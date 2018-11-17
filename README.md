@@ -1,3 +1,5 @@
+A React.js port of Thulinma's [Animal Crossing New Leaf Pattern Tool](https://thulinma.com/acnl/)
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts

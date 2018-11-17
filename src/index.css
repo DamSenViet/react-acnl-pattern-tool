@@ -1,14 +1,130 @@
-body {
-  margin: 0;
-  padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+body, html {
+  color: white;
+  background-color: black;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-    monospace;
+canvas {
+  border: 1px solid white;
+  background-color: white;
+}
+
+#canvas_editor {
+	display:inline-block;
+}
+
+#acnl_icon {
+	display:block;
+	margin-left:32px;
+	margin-bottom:32px
+}
+
+#acnl_icon_zoom {
+	display:block;
+}
+
+#acnl_icon_zoomier {
+	margin-left: 5px;
+	margin-right: 5px;
+}
+
+#colors {
+	display:inline-block;
+	margin-right: 5px;
+}
+
+#color_pal {
+	display:inline-block;
+	width:160px;
+	height:180px;
+}
+
+#colors, #color_pal {
+  border: 2px solid white;
+}
+
+.col_block {
+  width: 32px;
+  height: 32px;
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+  font-size: 0;
+}
+
+.col_block.picked {
+  width: 24px;
+  height: 24px;
+  margin: 4px;
+}
+
+.col_row {
+  height: 32px;
+  background-color: black;
+}
+
+.col_pal_block {
+  height: 30px;
+  width: 30px;
+  float: left;
+  overflow: hidden;
+  margin: 5px;
+}
+
+.col_pal_row {
+  height: 10px;
+  width: 150px;
+  float: left;
+  overflow: hidden;
+  margin: 5px;
+}
+
+.col_pal {
+  width: 10px;
+  height: 10px;
+  border: 0;
+  float: left;
+  margin: 0;
+  padding: 0;
+}
+
+.col_pal.picked {
+  width: 5px;
+  height: 5px;
+  margin: 2.5px;
+}
+
+.question .que {
+  color: limegreen;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+input, select {
+  border: 0;
+  color: white;
+  background-color: #444444;
+  padding-left: 1em;
+  padding-right: 1em;
+}
+
+#icon_title {
+  width: 15em;
+}
+
+#icon_creator, #icon_town {
+  width: 9em;
+}
+
+#icon_creator_id, #icon_town_id, #unknown_id {
+  margin-left: 1em;
+  width: 3em;
+}
+
+.pretext {
+  width: 7em;
+  display: inline-block;
+}
+
+a, a:visited, a:active, a:hover {
+  color: yellow;
 }
