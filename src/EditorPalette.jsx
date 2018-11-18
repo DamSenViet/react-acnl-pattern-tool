@@ -1,6 +1,21 @@
 import React from 'react';
 
 class EditorPaletteColor extends React.Component {
+	constructor(props) {
+		super(props);
+
+		this.editorPaletteColor = React.createRef();
+		this.onMouseOver = this.onMouseOver.bind(this);
+	}
+
+	// event handlers do not have this context matched to the component instance
+	// when using es6 classes
+	onMouseOver(event) {
+		if (event.buttons === 1) {
+			this.editorPaletteColor.current.click();
+		}
+	}
+
 	render() {
 		const isPicked = this.props.isPicked;
 		const className = (isPicked)? "col_pal picked" : "col_pal";
@@ -9,15 +24,16 @@ class EditorPaletteColor extends React.Component {
 
 		return (
 			<div
+				ref = {this.editorPaletteColor}
 				className = {className}
 				style = {backgroundColor}
 				onClick = {onClick}
+				onMouseOver = {this.onMouseOver}
 			>
 			</div>
 		);
 	}
 }
-
 
 
 class EditorPalette extends React.Component {

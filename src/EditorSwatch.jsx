@@ -1,6 +1,23 @@
 import React from 'react';
 
 class EditorSwatchColor extends React.Component {
+	constructor(props) {
+		super(props);
+
+		// for binding events to underlying html elements
+		this.editorSwatchColor = React.createRef();
+		this.onMouseOver = this.onMouseOver.bind(this);
+	}
+
+	// event handlers do not have this context matched to the component instance
+	// when using es6 classes
+	onMouseOver(event) {
+		if (event.buttons === 1) {
+			this.editorSwatchColor.current.click();
+		}
+	}
+
+
 	render() {
 		const isPicked = this.props.isPicked;
 		const className = (isPicked)? "col_block picked" : "col_block";
@@ -10,9 +27,11 @@ class EditorSwatchColor extends React.Component {
 
 		return (
 			<div
+				ref = {this.editorSwatchColor}
 				className = {className}
 				style = {backgroundColor}
 				onClick = {onClick}
+				onMouseOver = {this.onMouseOver}
 			>
 			</div>
 		);

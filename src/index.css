@@ -39,6 +39,7 @@ canvas {
 }
 
 #colors, #color_pal {
+	user-select: none;
   border: 2px solid white;
 }
 

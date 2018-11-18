@@ -17,17 +17,24 @@ class Editor extends React.Component {
 		};
 	}
 
-	selectColorSwatch(index, color) {
-		this.setState({
-			chosenColor: index,
-			chosenColorHex: color
-		});
+	selectColorSwatch(index, colorHex) {
+		if (this.state.chosenColorHex !== colorHex) {
+			this.setState({
+				chosenColor: index,
+				chosenColorHex: colorHex
+			});
+		}
 	}
 
-	selectColorPalette(color){
-		this.setState({
-			chosenColorHex: color,
-		})
+	selectColorPalette(colorHex){
+		if (this.state.chosenColorHex !== colorHex) {
+			this.setState({
+				chosenColorHex: colorHex,
+			});
+
+			// update QR code
+
+		}
 	}
 
 	render() {
