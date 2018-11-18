@@ -5,11 +5,13 @@ class EditorPaletteColor extends React.Component {
 		const isPicked = this.props.isPicked;
 		const className = (isPicked)? "col_pal picked" : "col_pal";
 		const backgroundColor = { backgroundColor : this.props.color };
+		const onClick = this.props.onClick;
 
 		return (
 			<div
 				className = {className}
 				style = {backgroundColor}
+				onClick = {onClick}
 			>
 			</div>
 		);
@@ -223,6 +225,18 @@ class EditorPalette extends React.Component {
 		}
 	}
 
+
+	renderColor(isPicked, color) {
+		return (
+			<EditorPaletteColor
+				isPicked = {isPicked}
+				color = {color}
+				key = {color}
+				onClick = {() => this.props.onClick(color)}
+			/>
+		);
+	}
+
 	render() {
 		// PROCEDURALLY GENERATING PALETTE
 		let colorBlocks = [];
@@ -232,20 +246,11 @@ class EditorPalette extends React.Component {
 				let color = this.getColor(i + j);
 				let isPicked = this.props.chosenColorHex === color;
 
-				colorBlock.push(
-					<EditorPaletteColor
-						isPicked = {isPicked}
-						color = {color}
-						key = {color}
-					/>
-				);
+				colorBlock.push(this.renderColor(isPicked, color));
 			}
 
 			colorBlocks.push(
-				<div
-					className = "col_pal_block"
-					key = {i + ""}
-				>
+				<div className = "col_pal_block" key = {i + ""}>
 					{colorBlock}
 				</div>
 			);
@@ -256,19 +261,10 @@ class EditorPalette extends React.Component {
 		for (let i = 0x0F; i < 0xFF; i += 0x10) {
 			let color = this.getColor(i);
 			let isPicked = (this.props.chosenColorHex === color);
-			greyColorBlock.push(
-				<EditorPaletteColor
-					isPicked = {isPicked}
-					color = {color}
-					key = {color}
-				/>
-			);
+			greyColorBlock.push(this.renderColor(isPicked, color));
 		}
 		colorBlocks.push(
-			<div
-				className = "col_pal_row"
-				key = {10 + ""}
-			>
+			<div className = "col_pal_row" key = {10 + ""}>
 				{greyColorBlock}
 			</div>
 		);

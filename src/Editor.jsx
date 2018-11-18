@@ -17,26 +17,18 @@ class Editor extends React.Component {
 		};
 	}
 
-	updateQRCode() {
-		// updates QR code to match canvas contents
-	}
-
-	// swatch notifies of color switch
 	selectColorSwatch(index, color) {
-		// update chosen, that's it
 		this.setState({
 			chosenColor: index,
 			chosenColorHex: color
 		});
 	}
 
-	// palette notifies of color select
 	selectColorPalette(color){
-		// make swatch color match palette's selected
-		// update QR code data (swatch)
-		// trigger rerender of pattern
+		this.setState({
+			chosenColorHex: color,
+		})
 	}
-
 
 	render() {
 		return (
@@ -45,10 +37,13 @@ class Editor extends React.Component {
 
 				<EditorSwatch
 					chosenColor = {this.state.chosenColor}
+					chosenColorHex = {this.state.chosenColorHex}
 					onClick = {(index, color) => this.selectColorSwatch(index, color)}
 				/>
+
 				<EditorPalette
 					chosenColorHex = {this.state.chosenColorHex}
+					onClick = {(color) => this.selectColorPalette(color)}
 				/>
 			</div>
 		);

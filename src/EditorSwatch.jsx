@@ -43,10 +43,20 @@ class EditorSwatch extends React.Component {
 		};
 	}
 
+	updateSelectedColor(index, newColor) {
+		const swatchColor = this.state.swatchColors[index];
+		if (swatchColor !== newColor) {
+			const swatchColors = this.state.swatchColors.slice();
+			swatchColors[index] = newColor;
+			this.setState({
+				swatchColors: swatchColors,
+			});
+		}
+	}
+
 	renderColor(i) {
 		const color = this.state.swatchColors[i];
-		const isPicked = (this.props.chosenColor === i);
-
+		const isPicked = (this.props.chosenColor === i)
 
 		return (
 			<EditorSwatchColor
@@ -57,7 +67,12 @@ class EditorSwatch extends React.Component {
 		);
 	}
 
+
 	render() {
+		const chosenColorIndex = this.props.chosenColor;
+		const newColor = this.props.chosenColorHex;
+		this.updateSelectedColor(chosenColorIndex, newColor);
+
 		return (
 			<div id="colors">
 		    <div className="col_row">
