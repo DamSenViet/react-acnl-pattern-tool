@@ -4,12 +4,15 @@ class EditorSwatchColor extends React.Component {
 	render() {
 		const isPicked = this.props.isPicked;
 		const className = (isPicked)? "col_block picked" : "col_block";
+
 		const backgroundColor = { backgroundColor : this.props.color };
+		const onClick = this.props.onClick;
 
 		return (
 			<div
 				className = {className}
 				style = {backgroundColor}
+				onClick = {onClick}
 			>
 			</div>
 		);
@@ -43,10 +46,13 @@ class EditorSwatch extends React.Component {
 	renderColor(i) {
 		const color = this.state.swatchColors[i];
 		const isPicked = (this.props.chosenColor === i);
+
+
 		return (
 			<EditorSwatchColor
 				isPicked = {isPicked}
 				color = {color}
+				onClick = {() => this.props.onClick(i, color)}
 			/>
 		);
 	}

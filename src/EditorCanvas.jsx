@@ -3,9 +3,10 @@ import React from 'react';
 class EditorCanvas extends React.Component {
 	constructor(props) {
 		super(props);
+		this.state = {
+			isDrawing: false
+		}
 	}
-
-
 
 
 	render() {
