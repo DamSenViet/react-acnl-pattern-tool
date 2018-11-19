@@ -48,7 +48,7 @@ To learn React, check out the [React documentation](https://reactjs.org/).
 
 ## Old Architecture
 
-The architecture for original application (not this one) was incredibly messy. Both the controller and model directly rendered parts of the view on their own.
+The architecture for original application (not this one) was unorganized. Both the controller and model directly rendered parts of the view on their own. We needed some separation for clarity.
 
 ## New Architecture
 

@@ -103,8 +103,9 @@ class ACNL {
 		return this.data.length === 0x870;
 	}
 
+
 	// draw into the data, not to a canvas
-	// return success status to determine render
+	// return success status to determine whether or not to re-render
 	colorPixel(x, y, chosenColor) {
 		// check if x, y is available coordinate
 		// check if c is a valid color
@@ -132,7 +133,7 @@ class ACNL {
 		// need to make sure we don't override other pixels
 		let val = this.data.charCodeAt(offset) & 0xFF;
 		let oldval = val;
-		if ((x % 2) == 1) {
+		if ((x % 2) === 1) {
 			// keep last half, replace first half with chosen color
 			val = (val & 0x0F) + (chosenColor << 4);
 		} else {
@@ -152,19 +153,16 @@ class ACNL {
 	getSwatch() {
 		let binColorsStr = this.data.substr(0x58, 15).split("");
 		return binColorsStr.map((char) => {
-			let binColor = char.charCodeAt(0);
-			return ACNL.paletteBinToHex[binColor];
+			return char.charCodeAt(0);
 		});
 	}
 
-	setSwatchColor(chosenColor, newColorHex) {
+	setSwatchColor(chosenColor, newBinColor) {
 		if (chosenColor < 0 || chosenColor > 15) throw new Error("invalid chosen color");
-
-		let newColorBin = ACNL.paletteHexToBin[newColorHex];
-		if (newColorBin === undefined) {
+		if (ACNL.paletteBinToHex[newBinColor] === undefined) {
 			throw new Error("new color is invalid");
 		}
-		this.setByte(0x58 + chosenColor, newColorBin);
+		this.setByte(0x58 + chosenColor, newBinColor);
 	}
 
 

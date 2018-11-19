@@ -35,13 +35,15 @@ class EditorPaletteColor extends React.Component {
 
 class EditorPalette extends React.Component {
 	// input (color) is a hex code used for mapping to ACNL file
-	renderColor(isPicked, color) {
+	renderColor(binColor) {
+		let isPicked = this.props.chosenBinColor === binColor;
+		let color = ACNL.paletteBinToHex[binColor];
 		return (
 			<EditorPaletteColor
 				isPicked = {isPicked}
 				color = {color}
-				key = {color}
-				onClick = {() => this.props.onClick(color)}
+				key = {binColor.toString()}
+				onClick = {() => this.props.onClick(binColor)}
 			/>
 		);
 	}
@@ -50,33 +52,32 @@ class EditorPalette extends React.Component {
 		// PROCEDURALLY GENERATING PALETTE
 		let colorBlocks = [];
 		for (let i = 0x00; i < 0xFF; i+=0x10) {
-			let colorBlock = [];
+			let colors = [];
 			for (let j = 0x00; j < 0x09; j+=0x01) {
-				let color = ACNL.paletteBinToHex[i + j];
-				let isPicked = this.props.chosenColorHex === color;
-
-				colorBlock.push(this.renderColor(isPicked, color));
+				colors.push(this.renderColor(i + j));
 			}
 
-			colorBlocks.push(
-				<div className = "col_pal_block" key = {i + ""}>
-					{colorBlock}
+			let colorBlock = (
+				<div className = "col_pal_block" key = {i.toString()}>
+					{colors}
 				</div>
 			);
+
+			colorBlocks.push(colorBlock);
 		}
 
 		// grey row
-		let greyColorBlock = [];
+		let greyColors = [];
 		for (let i = 0x0F; i < 0xFF; i += 0x10) {
-			let color = ACNL.paletteBinToHex[i];
-			let isPicked = (this.props.chosenColorHex === color);
-			greyColorBlock.push(this.renderColor(isPicked, color));
+			greyColors.push(this.renderColor(i));
 		}
-		colorBlocks.push(
-			<div className = "col_pal_row" key = {10 + ""}>
-				{greyColorBlock}
+		let greyColorBlock = (
+			<div className = "col_pal_row" key = {"10"}>
+				{greyColors}
 			</div>
 		);
+		colorBlocks.push(greyColorBlock);
+
 
 		return (
 			<div id="color_pal">{colorBlocks}</div>

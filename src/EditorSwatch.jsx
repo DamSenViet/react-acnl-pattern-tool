@@ -1,4 +1,5 @@
 import React from 'react';
+import ACNL from './acnl.js'
 
 class EditorSwatchColor extends React.Component {
 	constructor(props) {
@@ -39,7 +40,8 @@ class EditorSwatchColor extends React.Component {
 class EditorSwatch extends React.Component {
 	renderColor(i) {
 		const isPicked = (this.props.chosenColor === i)
-		const color = this.props.swatch[i];
+		const binColor = this.props.swatch[i];
+		const color = ACNL.paletteBinToHex[binColor];
 
 		return (
 			<EditorSwatchColor

@@ -17,20 +17,22 @@ class Editor extends React.Component {
 		};
 	}
 
-	selectSwatchColor(chosenColor) {
-		let oldChosenColor = this.state.chosenColor;
-		if (oldChosenColor !== chosenColor) {
+	selectSwatchColor(newChosenColor) {
+		let chosenColor = this.state.chosenColor;
+		if (chosenColor !== newChosenColor) {
 			this.setState({
-				chosenColor: chosenColor,
+				chosenColor: newChosenColor,
 			});
 		}
 	}
 
-	selectPaletteColor(colorHex){
+
+	selectPaletteColor(newBinColor){
 		let acnl = this.state.acnl;
 		let chosenColor = this.state.chosenColor;
-		if (acnl.getSwatch()[chosenColor] !== colorHex) {
-			acnl.setSwatchColor(chosenColor, colorHex);
+		let chosenBinColor = acnl.getSwatch()[chosenColor];
+		if (chosenBinColor !== newBinColor) {
+			acnl.setSwatchColor(chosenColor, newBinColor);
 			this.setState({
 				acnl: acnl,
 			});
@@ -52,7 +54,7 @@ class Editor extends React.Component {
 				/>
 
 				<EditorPalette
-					chosenColorHex = {acnl.getSwatch()[chosenColor]}
+					chosenBinColor = {acnl.getSwatch()[chosenColor]}
 					onClick = {this.selectPaletteColor.bind(this)}
 				/>
 			</div>
