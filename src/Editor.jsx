@@ -4,7 +4,7 @@ import EditorPalette from './EditorPalette.jsx';
 import EditorSwatch from './EditorSwatch.jsx';
 
 // js imports
-import ACNL from './ACNL.js';
+import ACNL from './acnl.js';
 
 // control center for all editor things
 // maintains control for drawing and data
@@ -12,45 +12,48 @@ class Editor extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
+			acnl: new ACNL(),
  			chosenColor: 0,
-			chosenColorHex: "#FFFFFF",
 		};
 	}
 
-	selectColorSwatch(index, colorHex) {
-		if (this.state.chosenColorHex !== colorHex) {
+	selectSwatchColor(chosenColor) {
+		let oldChosenColor = this.state.chosenColor;
+		if (oldChosenColor !== chosenColor) {
 			this.setState({
-				chosenColor: index,
-				chosenColorHex: colorHex
+				chosenColor: chosenColor,
 			});
 		}
 	}
 
-	selectColorPalette(colorHex){
-		if (this.state.chosenColorHex !== colorHex) {
+	selectPaletteColor(colorHex){
+		let acnl = this.state.acnl;
+		let chosenColor = this.state.chosenColor;
+		if (acnl.getSwatch()[chosenColor] !== colorHex) {
+			acnl.setSwatchColor(chosenColor, colorHex);
 			this.setState({
-				chosenColorHex: colorHex,
+				acnl: acnl,
 			});
-
-			// update QR code
-
 		}
 	}
 
 	render() {
+		let acnl = this.state.acnl;
+		let chosenColor = this.state.chosenColor;
+
 		return (
 			<div className="editor">
 				<EditorCanvas />
 
 				<EditorSwatch
-					chosenColor = {this.state.chosenColor}
-					chosenColorHex = {this.state.chosenColorHex}
-					onClick = {(index, color) => this.selectColorSwatch(index, color)}
+					swatch = {acnl.getSwatch()}
+					chosenColor = {chosenColor}
+					onClick = {this.selectSwatchColor.bind(this)}
 				/>
 
 				<EditorPalette
-					chosenColorHex = {this.state.chosenColorHex}
-					onClick = {(color) => this.selectColorPalette(color)}
+					chosenColorHex = {acnl.getSwatch()[chosenColor]}
+					onClick = {this.selectPaletteColor.bind(this)}
 				/>
 			</div>
 		);

@@ -44,3 +44,21 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
 To learn React, check out the [React documentation](https://reactjs.org/).
+
+
+## Old Architecture
+
+The architecture for original application (not this one) was incredibly messy. Both the controller and model directly rendered parts of the view on their own.
+
+## New Architecture
+
+The new architecture uses an MVC model. The controller interacts with the model and is responsible for rendering the visual representation of the model. The controller now consists of several parts.
+
+* Editor
+* Canvas
+* Swatch
+* Palette
+
+Note: the term model will refer to the ACNL file class
+
+The editor is the parent of the canvas, palette, and swatch, and acts as the main center of control. Component's cannot update each other directly, but must now communicate with the editor component in order to update other components and the model respectively. Figuratively, the "editor" is a user that can manipulate both the model and the holds onto user information (e.g. current drawing color).

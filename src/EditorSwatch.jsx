@@ -6,7 +6,6 @@ class EditorSwatchColor extends React.Component {
 
 		// for binding events to underlying html elements
 		this.editorSwatchColor = React.createRef();
-		this.onMouseOver = this.onMouseOver.bind(this);
 	}
 
 	// event handlers do not have this context matched to the component instance
@@ -16,7 +15,6 @@ class EditorSwatchColor extends React.Component {
 			this.editorSwatchColor.current.click();
 		}
 	}
-
 
 	render() {
 		const isPicked = this.props.isPicked;
@@ -31,7 +29,7 @@ class EditorSwatchColor extends React.Component {
 				className = {className}
 				style = {backgroundColor}
 				onClick = {onClick}
-				onMouseOver = {this.onMouseOver}
+				onMouseOver = {this.onMouseOver.bind(this)}
 			>
 			</div>
 		);
@@ -39,59 +37,20 @@ class EditorSwatchColor extends React.Component {
 }
 
 class EditorSwatch extends React.Component {
-	constructor(props) {
-		super(props);
-		this.state = {
-			swatchColors: [
-				"#FFFFFF",
-				"#ECECEC",
-				"#DADADA",
-				"#C8C8C8",
-				"#B6B6B6",
-				"#A3A3A3",
-				"#919191",
-				"#7F7F7F",
-				"#6D6D6D",
-				"#5B5B5B",
-				"#484848",
-				"#363636",
-				"#242424",
-				"#121212",
-				"#000000",
-			],
-		};
-	}
-
-	updateSelectedColor(index, newColor) {
-		const swatchColor = this.state.swatchColors[index];
-		if (swatchColor !== newColor) {
-			const swatchColors = this.state.swatchColors.slice();
-			swatchColors[index] = newColor;
-			this.setState({
-				swatchColors: swatchColors,
-			});
-		}
-	}
-
 	renderColor(i) {
-		const color = this.state.swatchColors[i];
 		const isPicked = (this.props.chosenColor === i)
+		const color = this.props.swatch[i];
 
 		return (
 			<EditorSwatchColor
 				isPicked = {isPicked}
 				color = {color}
-				onClick = {() => this.props.onClick(i, color)}
+				onClick = {() => this.props.onClick(i)}
 			/>
 		);
 	}
 
-
 	render() {
-		const chosenColorIndex = this.props.chosenColor;
-		const newColor = this.props.chosenColorHex;
-		this.updateSelectedColor(chosenColorIndex, newColor);
-
 		return (
 			<div id="colors">
 		    <div className="col_row">
