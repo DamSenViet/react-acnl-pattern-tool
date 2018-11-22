@@ -2,6 +2,8 @@
 //.ACNL file type for importing
 //
 //0x 00 - 0x 29 ( 42) = Pattern Title
+// need to check 0x28 - 0x29 may be a null terminator
+
 //0x 2A - 0x 2B (  2) = User ID // huhhh???
 //0x 2C - 0x 3F ( 20) = User Name
 //0x 40 - 0x 41 (  2) = Town ID // what is this even for lmao
@@ -27,7 +29,10 @@ class ACNL {
 			// set default data
 			// initial data is only 620 in length
 			// only contains 1 pattern
-			this.data = window.atob("RQBtAHAAdAB5AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABVAG4AawBuAG8AdwBuAAAAAAAAAAAAVQBuAGsAbgBvAHcAbgAAAAAAAABeCw8fLz9PX29/j5+vv8/f73YKCQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
+			this.data = window.atob("RQBtAHAAdAB5AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABVAG4AawBuAG8AdwBuAAAAAAAAAAAAVQBuAGsAbgBvAHcAbgAAAAAAAABeCw8fLz9PX29/j5+vv8/f73YKCQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=");
+
+			// alternate default for testing
+			// this.data = window.atob("QgBvAGwAZAAgAGEAbgBkACAAQgByAGEAcwBoAAAAAAAAAAAAAAAAAAAAYPVKAGEAawBlAAAAAAAAAAAAAAAAAC2xTABlAHcAZQBzAAAAAAAAAAAAAQAxCvBxdCEPI9KDJKA/EqOh78wKCQAAVVVVUiISVRFVVRERERUREVVVUkVVFRUR7u7uHlVVFRFVVVVUJVIi7t3dye5VJVURVVJVVVIh4t7Q3d3sXlUiEVVVVVJUId4AoN3dzV4iVUFVVRRVFeEOoN3d3d3sIhFBVVRRRVHuAODunt3d7CUVQVVVREThDgruG56d3ewlEURVURQU7tDdvhve2c3uJRFEVUQR7trd3b7h3p3MXiIRRFVB4dDd7t7t7t3d7lUlEURVEQ7Q7VXl3d3d3V5VJRFEheHarR5VVd7d3d3tVSIVRFXh3e0REVXu3d3N7FUiEUQR4d3tERHl7t7d7cxeUhFEVeHdHhFU5d3e3ezNXhIRRFVB7hVBVOXd3t3s3l4VEURVEUQREVXl3d7N3c5eFRFBVRURVVVV5d3e3czOXlVRQVVVFVVV5e7d3t3Nzu5eVUFVVVEVVe5n3d7d3M7c7oVBVVWBUoVu1u3e3d3OzOyIQVWCWFiC5e7u3d3d7czsWEFViCWFUlXV7t3d3e3ujhURVVVRhVJV5d7t7t3tVYUVESVSVVVV5e7t7lXu7R4RERFVFVVVEe7d5hUR5c3uEVIRVBVVVeHefV4VUeXe7F5YUYRVVVXh3XYeERVV3szuVVW1iFiF4W3nFRFVVe7N7FVVu4uIVeVt7hJVWFXo3exVVbu7u0tV7i4iVVVVVe6OVVU=");
 		}
 	}
 
@@ -68,6 +73,10 @@ class ACNL {
 
 		let tmp = "";
 		for (let i = offset; i < offset + len; i += 2){
+			// reconstruct the utf16 byte
+			// note utf-16 format is big endian (most significant byte stored first)
+			// but, in storage we use little endian (most significant byte last)
+			// therefore we need to grab the right byte first
 			let char = (this.data.charCodeAt(i+1) << 8) + this.data.charCodeAt(i);
 			if (char === 0){return tmp;}
 			tmp += String.fromCharCode(char);
@@ -82,13 +91,13 @@ class ACNL {
 			// pattern title
 			case 0x00: len = 21; break;
 			// creator name
-			case 0x2c: len = 10; break;
+			case 0x2C: len = 10; break;
 			// town name
 			case 0x42: len = 10; break;
-			default: throw new Error("not valid utf-16 data");
+			default: throw new Error("not valid utf-16 data location");
 		}
 
-		for (let i = 0; i < len; i++){
+		for (let i = 0; i < len; ++i){
       if (i >= str.length){
         this.setByte(offset + i*2, 0);
         this.setByte(offset + i*2+1, 0);
@@ -99,16 +108,56 @@ class ACNL {
     }
 	}
 
+	getID(offset) {
+		switch(offset) {
+			// user id
+			case 0x2A: break;
+			// town id
+			case 0x40: break;
+			default: throw new Error("data address specified is not an id");
+		}
+
+		let left = this.getByte(offset);
+		let right = this.getByte(offset);
+		let val = (left << 8) + right;
+		val = val.toString(16);
+		return val;
+	}
+
+	setID(offset, str) {
+		// verify offset
+		switch(offset) {
+			// user id
+			case 0x2A: break;
+			// town id
+			case 0x40: break;
+			default: throw new Error("data address specified is not an id");
+		}
+
+		let num = parseInt(str, 16);
+		// check if num is larger than 16 bits and valid
+		if (isNaN(num) || num >= 65536) {
+			throw new Error("not valid id data");
+		}
+
+		// store first byte's, then second
+		// & with 2 bytes of 1's in binary
+		// bit shifting to remove extra bits and pad with 0's in binary
+		// AND operator 0xFF leaves only the last 8 bits
+		this.setByte(offset, (num >> 8) & 0xFF);
+		this.setByte(offset + 1, num & 0xFF);
+	}
+
 	isProPattern() {
 		return this.data.length === 0x870;
 	}
 
-
-	// draw into the data, not to a canvas
-	// return success status to determine whether or not to re-render
 	colorPixel(x, y, chosenColor) {
+		if (chosenColor < 0 || chosenColor > 15) {
+			throw new Error("invalid chosen color");
+		}
+
 		// check if x, y is available coordinate
-		// check if c is a valid color
 		// check for 64 vs 32 bit patterns
 		if (
 			isNaN(x) ||
@@ -116,9 +165,7 @@ class ACNL {
 			x < 0 ||
 			y < 0 ||
 			x > 63 ||
-			y > 63 ||
-			chosenColor < 0 ||
-			chosenColor > 15
+			y > 63
 		) return false;
 
 		if (
@@ -127,9 +174,16 @@ class ACNL {
 		) return false;
 
 
+		// each "pixel" in the pattern is only half a byte (colors are 0-14)
+		// since each pattern is 32 x 32, we need only 16 bytes in width
+		// to represent a row of the pattern, y * 16 allows us to skip rows
+		// x assumes that you can get pixels from 0 -> 64 in this situation
+		// to get column, we need to x/2
+
+		// reminder that this is a port, will have to refactor this to only color
+		// pixels in specific patterns in the future
 		let offset = 0x6C + Math.floor(x/2) + y * 16;
 
-		// each "pixel" in the pattern is only half a byte (colors are 0-14)
 		// need to make sure we don't override other pixels
 		let val = this.data.charCodeAt(offset) & 0xFF;
 		let oldval = val;
@@ -149,8 +203,11 @@ class ACNL {
 		return true;
 	}
 
-	// not using getters/setters b/c only need one
-	getSwatch() {
+	get patterns() {
+		return this.data.substr(0x6C, 2048);
+	}
+
+	get swatch() {
 		let binColorsStr = this.data.substr(0x58, 15).split("");
 		return binColorsStr.map((char) => {
 			return char.charCodeAt(0);
@@ -163,6 +220,46 @@ class ACNL {
 			throw new Error("new color is invalid");
 		}
 		this.setByte(0x58 + chosenColor, newBinColor);
+	}
+
+	get patternTitle() {
+		return this.from_utf16(0x00);
+	}
+
+	set patternTitle(str) {
+		this.to_utf16(0x00, str);
+	}
+
+	get userName() {
+		return this.from_utf16(0x2C);
+	}
+
+	set userName(str) {
+		this.to_utf16(0x2C ,str);
+	}
+
+	get userID() {
+		return this.getID(0x2A);
+	}
+
+	set userID(str) {
+		this.setID(0x2A, str);
+	}
+
+	get townName() {
+		return this.from_utf16(0x42);
+	}
+
+	set townName(str) {
+		this.to_utf16(0x42, str);
+	}
+
+	get townID() {
+		return this.getID(0x40);
+	}
+
+	set townID(str) {
+		return this.setID(0x40, str);
 	}
 
 

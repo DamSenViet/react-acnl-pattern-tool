@@ -4,10 +4,14 @@ import ACNL from './acnl.js';
 class EditorPaletteColor extends React.Component {
 	constructor(props) {
 		super(props);
+		// for binding events to underlying html elements
 		this.editorPaletteColor = React.createRef();
 	}
 
-	onMouseOver(event) {
+	// event handlers do not have this context matched to the component instance
+	// when using es6 classes
+	onMouseMove(event) {
+		// if holding down click and dragging, change color
 		if (event.buttons === 1) {
 			this.editorPaletteColor.current.click();
 		}
@@ -25,7 +29,7 @@ class EditorPaletteColor extends React.Component {
 				className = {className}
 				style = {backgroundColor}
 				onClick = {onClick}
-				onMouseOver = {this.onMouseOver.bind(this)}
+				onMouseMove = {this.onMouseMove.bind(this)}
 			>
 			</div>
 		);

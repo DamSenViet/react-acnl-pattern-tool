@@ -11,7 +11,8 @@ class EditorSwatchColor extends React.Component {
 
 	// event handlers do not have this context matched to the component instance
 	// when using es6 classes
-	onMouseOver(event) {
+	onMouseMove(event) {
+		// if holding down click and dragging, change color
 		if (event.buttons === 1) {
 			this.editorSwatchColor.current.click();
 		}
@@ -20,7 +21,6 @@ class EditorSwatchColor extends React.Component {
 	render() {
 		const isPicked = this.props.isPicked;
 		const className = (isPicked)? "col_block picked" : "col_block";
-
 		const backgroundColor = { backgroundColor : this.props.color };
 		const onClick = this.props.onClick;
 
@@ -30,7 +30,7 @@ class EditorSwatchColor extends React.Component {
 				className = {className}
 				style = {backgroundColor}
 				onClick = {onClick}
-				onMouseOver = {this.onMouseOver.bind(this)}
+				onMouseMove = {this.onMouseMove.bind(this)}
 			>
 			</div>
 		);

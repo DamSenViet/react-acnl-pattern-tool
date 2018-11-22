@@ -48,7 +48,7 @@ To learn React, check out the [React documentation](https://reactjs.org/).
 
 ## Old Architecture
 
-The architecture for original application (not this one) was unorganized. Both the controller and model directly rendered parts of the view on their own. We needed some separation for clarity.
+The architecture for original application (not this one) was unorganized. Both the controller and model directly rendered parts of the view on their own. It wasn't very clear how it should be handled.
 
 ## New Architecture
 
@@ -61,4 +61,6 @@ The new architecture uses an MVC model. The controller interacts with the model 
 
 Note: the term model will refer to the ACNL file class
 
-The editor is the parent of the canvas, palette, and swatch, and acts as the main center of control. Component's cannot update each other directly, but must now communicate with the editor component in order to update other components and the model respectively. Figuratively, the "editor" is a user that can manipulate both the model and the holds onto user information (e.g. current drawing color).
+The editor is the parent of the canvas, palette, and swatch, and acts as the main center of control. Component's cannot update each other directly, but must now communicate with the editor component in order to update other components and the model respectively. Figuratively, the 'editor' is a user that can manipulate both the model and the view. The 'editor' holds onto user information (e.g. current drawing color).
+
+The components themselves are now modular, allowing for "mods". For example, pixel tools can be added in the form of a module. All they have to do is return a list of pixels that need to be colored in for the editor to handle via colorPixels([pixel, ...])';
