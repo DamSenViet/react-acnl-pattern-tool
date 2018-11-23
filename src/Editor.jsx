@@ -2,6 +2,7 @@ import React from 'react';
 import EditorCanvas from './EditorCanvas.jsx';
 import EditorPalette from './EditorPalette.jsx';
 import EditorSwatch from './EditorSwatch.jsx';
+import EditorQRCode from './EditorQRCode.jsx';
 
 // js imports
 import ACNL from './acnl.js';
@@ -13,21 +14,8 @@ class Editor extends React.Component {
 		super(props);
 		this.state = {
 			acnl: new ACNL(),
-			isDrawing: false,
  			chosenColor: 0,
-
-			// doesn't do anything (not yet at least!)
-			// should technically be a function that can return array of pixels
-			// can module of tools for this
-			chosenTool: null,
 		};
-	}
-
-	setDrawing(isDrawing) {
-		this.setState({
-			isDrawing: isDrawing,
-		});
-		console.log(isDrawing);
 	}
 
 	// draw
@@ -35,7 +23,6 @@ class Editor extends React.Component {
 	colorPixel(x, y) {
 		let acnl = this.state.acnl;
 		let chosenColor = this.state.chosenColor;
-		console.log(x, y);
 		if (acnl.colorPixel(x, y, chosenColor)) {
 			this.setState({
 				acnl: acnl,
@@ -93,20 +80,20 @@ class Editor extends React.Component {
 						swatch = {acnl.swatch}
 						patterns = {acnl.patterns}
 						isProPattern = {acnl.isProPattern()}
-						onClick = {this.colorPixel.bind(this)}
-						setDrawing = {this.setDrawing.bind(this)}
-						isDrawing = {isDrawing}
+						chosenColor = {chosenColor}
+						updatePixels = {this.colorPixels.bind(this)}
 					/>
+
 					<EditorCanvas
 						size = {128}
 						zoom = {2}
 						swatch = {acnl.swatch}
 						patterns = {acnl.patterns}
 						isProPattern = {acnl.isProPattern()}
-						onClick = {this.colorPixel.bind(this)}
-						setDrawing = {this.setDrawing.bind(this)}
-						isDrawing = {isDrawing}
+						chosenColor = {chosenColor}
+						updatePixels = {this.colorPixels.bind(this)}
 					/>
+
 				</div>
 				<EditorCanvas
 					size = {512}
@@ -114,9 +101,8 @@ class Editor extends React.Component {
 					swatch = {acnl.swatch}
 					patterns = {acnl.patterns}
 					isProPattern = {acnl.isProPattern()}
-					onClick = {this.colorPixel.bind(this)}
-					setDrawing = {this.setDrawing.bind(this)}
-					isDrawing = {isDrawing}
+					chosenColor = {chosenColor}
+					updatePixels = {this.colorPixels.bind(this)}
 				/>
 
 				<EditorSwatch
@@ -129,6 +115,7 @@ class Editor extends React.Component {
 					chosenBinColor = {acnl.swatch[chosenColor]}
 					onClick = {this.selectPaletteColor.bind(this)}
 				/>
+
 			</div>
 		);
 	}

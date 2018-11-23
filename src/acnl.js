@@ -20,6 +20,8 @@
 //0x66C - 0x86B (512) = Pattern Data 4 (optional)
 //0x86C - 0x86F (  4) = Zero padding (optional)
 
+// import * as FileSaver from 'file-saver';
+import * as FileSaver from 'file-saver';
 
 class ACNL {
 	constructor(data) {
@@ -33,6 +35,10 @@ class ACNL {
 
 			// alternate default for testing
 			// this.data = window.atob("QgBvAGwAZAAgAGEAbgBkACAAQgByAGEAcwBoAAAAAAAAAAAAAAAAAAAAYPVKAGEAawBlAAAAAAAAAAAAAAAAAC2xTABlAHcAZQBzAAAAAAAAAAAAAQAxCvBxdCEPI9KDJKA/EqOh78wKCQAAVVVVUiISVRFVVRERERUREVVVUkVVFRUR7u7uHlVVFRFVVVVUJVIi7t3dye5VJVURVVJVVVIh4t7Q3d3sXlUiEVVVVVJUId4AoN3dzV4iVUFVVRRVFeEOoN3d3d3sIhFBVVRRRVHuAODunt3d7CUVQVVVREThDgruG56d3ewlEURVURQU7tDdvhve2c3uJRFEVUQR7trd3b7h3p3MXiIRRFVB4dDd7t7t7t3d7lUlEURVEQ7Q7VXl3d3d3V5VJRFEheHarR5VVd7d3d3tVSIVRFXh3e0REVXu3d3N7FUiEUQR4d3tERHl7t7d7cxeUhFEVeHdHhFU5d3e3ezNXhIRRFVB7hVBVOXd3t3s3l4VEURVEUQREVXl3d7N3c5eFRFBVRURVVVV5d3e3czOXlVRQVVVFVVV5e7d3t3Nzu5eVUFVVVEVVe5n3d7d3M7c7oVBVVWBUoVu1u3e3d3OzOyIQVWCWFiC5e7u3d3d7czsWEFViCWFUlXV7t3d3e3ujhURVVVRhVJV5d7t7t3tVYUVESVSVVVV5e7t7lXu7R4RERFVFVVVEe7d5hUR5c3uEVIRVBVVVeHefV4VUeXe7F5YUYRVVVXh3XYeERVV3szuVVW1iFiF4W3nFRFVVe7N7FVVu4uIVeVt7hJVWFXo3exVVbu7u0tV7i4iVVVVVe6OVVU=");
+
+			// default is pro (for testing)
+			// this.data = window.atob("UwBhAHQAdQByAG4AIABIAG8AbwBkAGkAZQAAAAAAAAAAAAAAAAAAAAAA4PpNAG8AbwAtAE0AbwBvAAAAAAABAEbjTQBvAG8AIABMAGUAYQBmAAAAAQAxEd/f1Z+vjzIzz3+fD+9ff8sKAwAA3d3d3d2tZmd2Ztrd3d3d3d3d3d3d3WR2Z0bd3d3d3d2qqqqZmd1NdmfU3Z2ZmaqampmqqqqZEbu7EZmZmaqqqtqdmZmpmrG7uxupqqqqmZna3d3dnZq5mZmbqZmZmdnd2t3d3d3dvdmd293d3d3drdrd3d3d3b3ZnduIiNjd3a3a3d3d3d292Z2L3Yjd3d2t2t3d3d3dvdmd242I2N3drdrd3d3d3b3ZnduI3djd3a3a3d3d3d292Z2L2I3Y3d2t2t3d3d3dvdmdi4iI3d3drdrd3d3d3b3Zndvd3d3d3a3a3d3d3d292Z3b3d3d3d2t2t3d3d3d3d3d3d3d3d3drdrd3d3d3d3d3d3d3d3d3a3a3d3d3d3d3d3d3d3d3d2t2t3d3d3d3d3d3d3d3d3draqqqqqqqqqqqqqqqqqqqqqZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmaqqqqqqqqqqqqqqqqqqqqp3d3d3d3d3d3d3d3d3d3d3ZmZmZmZmZmZmZmZmZmZmZjMzMzMzMzMzMzMzMzMzMzNTMjNSUlJSM1IzUlJSM1MyJSUjJSUlJTU1IyUlJTUlJVMyM1JSUlIzMjNSUlIzUzIzMzMzMzMzMyUzMzMzMzMzUlJSUlJSUjJSU1JSUlJSUiUlJSUlJSUlMyMlJSUlJSXdqqqqqqqqqqqqqqqqqqrd3d2ZmZmqqqqqqpqZmZnd3ZnZ3d3dmamqqqqa3d3dTUSqqtrd3Z3d3d3d3d3d3aqq2p2q2t3d3d3d3d3dqqqaqdrdnand3d3d3d3d3ZqZmZna3d2dqqqq3d3dqqqZ3d2t2t3d3d2ZqaqqqpSZ3d3drdrd3d3d3ZmZmZnZ3d3d3a3a3d3d3d2NiIiI3d3d3d2t2t3d3d3d2N3d3djd3d3drdrd3d3djd3d3d2N3d3d3a3a3d3d3Yjd3d3djdjd3d2t2t3d3YjY3d3d3d2I2N3drdrd3Y3d2N3d3d3d2I3d3a3a3d3diIiIiIiIiIjY3d2t2t3d3d2N3d3d3Y3d3d3drdrd3d3d3djd3d3Y3d3d3a3a3d3d3d2NiIiI3d3d3d2tqqqqqqqqqqqqqqqqqqqqqpSZmZmZmZmZmZmZmZmZmZmUmZmZmZmZmZmZmZmZmZmZqqqqqqqqqqqqqqqqqqqqqnd3d3d3d3d3d3d3d3d3d3dmZmZmZmZmZmZmZmZmZmZmMzMzMzMzMzMzMzMzMzMzM1MyM1JSUlIyM1JSUlIzUzIlJSMlJSUlJSMlJSUlNSUlUzIzUlJSUjIzUlJSjYjdiKjZ3ama3d2p2d3d3Y2I3YiomZ2pzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMwAAAAAjYjdiKjZ3ama3d2p2d3d3Y2I3YiomZ2pzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMwAAAAA");
+
 		}
 	}
 
@@ -82,6 +88,24 @@ class ACNL {
 			tmp += String.fromCharCode(char);
 		}
 		return tmp;
+	}
+
+
+	download() {
+		try {
+			var ab = new ArrayBuffer(this.data.length);
+      var ia = new Uint8Array(ab);
+      for (var i = 0; i < this.data.length; i++) {
+        ia[i] = this.data.charCodeAt(i);
+      }
+      var blob = new Blob([ia], {"type": "application/octet-stream"});
+
+			FileSaver.saveAs(blob, this.from_utf16(0x00)+".acnl");
+		}
+
+		catch {
+			alert("Failed to save file. Try using a different browser. :-(");
+		}
 	}
 
 	// allows only for writing to utf-16 portions of data
@@ -173,7 +197,6 @@ class ACNL {
 			(x > 31 || y > 31)
 		) return false;
 
-
 		// each "pixel" in the pattern is only half a byte (colors are 0-14)
 		// since each pattern is 32 x 32, we need only 16 bytes in width
 		// to represent a row of the pattern, y * 16 allows us to skip rows
@@ -182,7 +205,23 @@ class ACNL {
 
 		// reminder that this is a port, will have to refactor this to only color
 		// pixels in specific patterns in the future
-		let offset = 0x6C + Math.floor(x/2) + y * 16;
+
+		// determine pattern quadrant
+
+		let patternNum;
+		// top left -> pattern 1
+		if (x <= 31 && y <= 31) patternNum = 0;
+		// bottom left -> pattern 2
+		else if (x <= 31 && y <= 63) patternNum = 1;
+		// top right -> pattern 3
+		else if (x <= 63 && y <= 31) patternNum = 2;
+		// bottom right -> pattern 4
+		else if (x <= 63 && y <= 63) patternNum = 3;
+
+		var offset = 0x6C + Math.floor(x % 32 / 2) + (y % 32) * 16;
+		// correct offset based on quadrant
+		offset += (patternNum * 512);
+		// console.log(offset.toString(16));
 
 		// need to make sure we don't override other pixels
 		let val = this.data.charCodeAt(offset) & 0xFF;

@@ -1,59 +1,88 @@
 import React from 'react';
 import ACNL from './acnl.js';
 
-// tools go with canvas
+// NOTE THAT THIS CLASS WILL ATTEMPT TO SUPRESS UPDATES
+// USING BUFFERS AND LOCAL CHANGES AND THEN DEFERRING THEM WHEN
+// EDITOR IS FREE, ALLOWS FOR MORE MOUSEMOVE UPDATES FOR SMOOTH DRAWING
+
 class EditorCanvas extends React.Component {
 	constructor(props) {
 		super(props);
 		this.canvas = React.createRef();
+
+		let actualZoom;
+		if (this.props.isProPattern) actualZoom = this.props.size / 64;
+		else actualZoom = this.props.size / 32;
+
+		// caching rect to prevent reflows and save cpu
+		// stall out qr code for as long as possible
+		this.state = {
+			actualZoom: actualZoom,
+			boundingClientRect: null,
+			pixelBuffer: [],
+			pixelRefreshTimer: null,
+			isDrawing: false,
+		};
+	}
+
+	preventRefresh() {
+		window.clearTimeout(this.state.refreshTimer);
+	}
+
+	triggerPixelRefresh() {
+		this.props.updatePixels(this.state.pixelBuffer);
+		// clear buffer
+		this.state.pixelBuffer = [];
+	}
+
+	updateBoundingClientRect(){
+		let boundingClientRect = this.canvas.current.getBoundingClientRect();
+		this.state.boundingClientRect = boundingClientRect;
 	}
 
 	draw(event) {
-		let size = this.props.size;
-
-		let actualZoom;
-		if (this.props.isProPattern) actualZoom = size / 64;
-		else actualZoom = size / 32;
-
-		let bounds = this.canvas.current.getBoundingClientRect();
-		let x = event.pageX - bounds.left;
-		let y = event.pageY - bounds.top;
+		let actualZoom = this.state.actualZoom;
+		let boundingClientRect = this.state.boundingClientRect;
+		let x = event.pageX - boundingClientRect.left - window.scrollX;
+		let y = event.pageY - boundingClientRect.top - window.scrollY;
 
 		x = Math.floor(x / actualZoom);
 		y = Math.floor(y / actualZoom);
 
 		// console.log(x, y);
-		this.props.onClick(x, y);
-	}
-
-	onClick(event) {
-		// canvas size
-		this.draw(event);
+		// make local changes only, update at a later time
+		this.state.pixelBuffer.push([x, y]);
+		let context = this.canvas.current.getContext("2d");
+		this.drawPixel(context, x, y, this.props.chosenColor, actualZoom);
 	}
 
 	onMouseMove(event) {
-		if (this.props.isDrawing) {
+		// browser will attempt to dump mousemove event before it completes
+		// if handler is not fast enough, need to ensure speed, using buffers
+		// and direct state changes instead of updates
+		this.preventRefresh();
+		if (this.state.isDrawing && event.buttons === 1) {
 			this.draw(event);
 		}
 	}
 
 	onMouseDown(event) {
-		this.props.setDrawing(true);
+		this.preventRefresh();
+		this.state.isDrawing = true;
+		// also do the onclick
+		this.draw(event);
 		// console.log("drawing");
 	}
 
 	onMouseUp(event) {
-		this.props.setDrawing(false);
+		this.triggerPixelRefresh();
+		this.state.isDrawing = false;
 		// console.log("not drawing");
 	}
 
 	drawPatterns() {
-		let size = this.props.size;
 		// adjust zoom factor for pattern size
-		let actualZoom;
-		if (this.props.isProPattern) actualZoom = size / 64;
-		else actualZoom = size / 32;
-
+		let actualZoom = this.state.actualZoom;
 		let context = this.canvas.current.getContext("2d");
 		let patterns = this.props.patterns;
 		for (let i = 0; i < patterns.length; ++i) {
@@ -76,11 +105,9 @@ class EditorCanvas extends React.Component {
 		if (y > 63) {
 			y-= 64; x+= 32;
 		}
-
 		try {
 			context.fillStyle = ACNL.paletteBinToHex[this.props.swatch[chosenColor]];
 			context.fillRect(x * zoom, y * zoom, zoom, zoom);
-
 			if (zoom > 5) {
 				context.fillStyle = "#AAAAAA";
 				context.fillRect(x * zoom + zoom - 1, y * zoom, 1, zoom);
@@ -93,9 +120,19 @@ class EditorCanvas extends React.Component {
 	// there's no reference to the actual node
 	componentDidMount() {
 		this.drawPatterns();
+		this.updateBoundingClientRect();
+		// attaching event handlers
+		window.addEventListener("scroll", this.updateBoundingClientRect.bind(this));
+		window.addEventListener("resize", this.updateBoundingClientRect.bind(this));
 	}
+
 	componentDidUpdate() {
 		this.drawPatterns();
+	}
+
+	componentWillUnmount() {
+		window.removeEventListener("scroll", this.updateBoundingClientRect.bind(this));
+		window.removeEventListener("resize", this.updateBoundingClientRect.bind(this));
 	}
 
 	render() {
@@ -113,7 +150,6 @@ class EditorCanvas extends React.Component {
 				id = {id}
 				width = {size}
 				height = {size}
-				onClick = {this.onClick.bind(this)}
 				onMouseDown = {this.onMouseDown.bind(this)}
 				onMouseUp = {this.onMouseUp.bind(this)}
 				onMouseMove = {this.onMouseMove.bind(this)}

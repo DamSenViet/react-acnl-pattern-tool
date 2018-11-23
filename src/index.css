@@ -129,3 +129,10 @@ input, select {
 a, a:visited, a:active, a:hover {
   color: yellow;
 }
+
+
+.qr {
+	padding: 10px;
+	background-color: white;
+	display: inline-block;
+}
