@@ -89,7 +89,6 @@ class EditorCanvas extends React.Component {
 		} catch(e) {};
 	}
 
-
 	// can't call draw inside render b/c on the first render
 	// there's no reference to the actual node
 	componentDidMount() {

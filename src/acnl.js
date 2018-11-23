@@ -2,7 +2,7 @@
 //.ACNL file type for importing
 //
 //0x 00 - 0x 29 ( 42) = Pattern Title
-// need to check 0x28 - 0x29 may be a null terminator
+// 0x28 0x29 are null terminators
 
 //0x 2A - 0x 2B (  2) = User ID // huhhh???
 //0x 2C - 0x 3F ( 20) = User Name
@@ -63,7 +63,7 @@ class ACNL {
 		let len;
 		switch(offset) {
 			// pattern title
-			case 0x00: len = 42; break;
+			case 0x00: len = 40; break;
 			// creator name
 			case 0x2c: len = 20; break;
 			// town name
@@ -89,7 +89,7 @@ class ACNL {
 		let len;
 		switch(offset) {
 			// pattern title
-			case 0x00: len = 21; break;
+			case 0x00: len = 20; break;
 			// creator name
 			case 0x2C: len = 10; break;
 			// town name
