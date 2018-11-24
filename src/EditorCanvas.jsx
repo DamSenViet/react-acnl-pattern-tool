@@ -1,10 +1,7 @@
 import React from 'react';
 import ACNL from './acnl.js';
 
-// NOTE THAT THIS CLASS WILL ATTEMPT TO SUPRESS UPDATES
-// USING BUFFERS AND LOCAL CHANGES AND THEN DEFERRING THEM WHEN
-// EDITOR IS FREE, ALLOWS FOR MORE MOUSEMOVE UPDATES FOR SMOOTH DRAWING
-
+// this component will attempt to supress updates to minimize full re-renders
 class EditorCanvas extends React.Component {
 	constructor(props) {
 		super(props);
@@ -13,36 +10,29 @@ class EditorCanvas extends React.Component {
 		let actualZoom;
 		if (this.props.isProPattern) actualZoom = this.props.size / 64;
 		else actualZoom = this.props.size / 32;
+		this.actualZoom = actualZoom;
 
 		// caching rect to prevent reflows and save cpu
-		// stall out qr code for as long as possible
-		this.state = {
-			actualZoom: actualZoom,
-			boundingClientRect: null,
-			pixelBuffer: [],
-			pixelRefreshTimer: null,
-			isDrawing: false,
-		};
+		// also cache context for speed
+		this.boundingClientRect = null;
+		this.context = null;
+
+		// no real state here
 	}
 
-	preventRefresh() {
-		window.clearTimeout(this.state.refreshTimer);
-	}
-
-	triggerPixelRefresh() {
-		this.props.updatePixels(this.state.pixelBuffer);
-		// clear buffer
-		this.state.pixelBuffer = [];
+	updateContext() {
+		let context = this.canvas.current.getContext("2d");
+		this.context = context;
 	}
 
 	updateBoundingClientRect(){
 		let boundingClientRect = this.canvas.current.getBoundingClientRect();
-		this.state.boundingClientRect = boundingClientRect;
+		this.boundingClientRect = boundingClientRect;
 	}
 
-	draw(event) {
-		let actualZoom = this.state.actualZoom;
-		let boundingClientRect = this.state.boundingClientRect;
+	draw(event, isTriggeringRefresh) {
+		let actualZoom = this.actualZoom;
+		let boundingClientRect = this.boundingClientRect;
 		let x = event.pageX - boundingClientRect.left - window.scrollX;
 		let y = event.pageY - boundingClientRect.top - window.scrollY;
 
@@ -50,83 +40,100 @@ class EditorCanvas extends React.Component {
 		y = Math.floor(y / actualZoom);
 
 		// console.log(x, y);
-		// make local changes only, update at a later time
-		this.state.pixelBuffer.push([x, y]);
-		let context = this.canvas.current.getContext("2d");
-		this.drawPixel(context, x, y, this.props.chosenColor, actualZoom);
-	}
-
-	onMouseMove(event) {
 		// browser will attempt to dump mousemove event before it completes
 		// if handler is not fast enough, need to ensure speed, using buffers
-		// and direct state changes instead of updates
-		this.preventRefresh();
-		if (this.state.isDrawing && event.buttons === 1) {
-			this.draw(event);
-		}
+		this.props.updatePixelBuffer(x, y, isTriggeringRefresh);
+	}
+
+
+	// occurs as the last event in a click-n-drag, if it completes
+	// refresh, and kill timers
+	onClick(event) {
+		// console.log("mouse click");
+		// these both will create race conditions in editor since they occur
+		// using async callbacks to resolve race condition
+		this.draw(event, true);
 	}
 
 	onMouseDown(event) {
-		this.preventRefresh();
-		this.state.isDrawing = true;
-		// also do the onclick
-		this.draw(event);
-		// console.log("drawing");
+		this.props.setIsDrawing(true);
+		// console.log("started drawing");
 	}
 
+	onMouseMove(event) {
+		let isDrawing = this.props.isDrawing;
+		if (isDrawing && event.buttons === 1) {
+			this.draw(event, false);
+		}
+	}
+
+	// WILL NOT TRIGGER IF MOUSEUP OUTSIDE OF CANVAS ELEMENTS
+	// timer exists in the editor to back up the manual triggerPixelRefresh
 	onMouseUp(event) {
-		this.triggerPixelRefresh();
-		this.state.isDrawing = false;
-		// console.log("not drawing");
+		// mouseup triggers before mouseclick
+		// console.log("mouse up");
+		this.props.setIsDrawing(false);
 	}
 
 	drawPatterns() {
 		// adjust zoom factor for pattern size
-		let actualZoom = this.state.actualZoom;
-		let context = this.canvas.current.getContext("2d");
 		let patterns = this.props.patterns;
 		for (let i = 0; i < patterns.length; ++i) {
 				let pixelPair = patterns.charCodeAt(i);
 				// get pixel binColors
 				let firstColor = pixelPair & 0x0F;
 				let secondColor = pixelPair >> 4;
-				this.drawOffset(context, i * 2, firstColor, actualZoom);
-				this.drawOffset(context, i * 2 + 1, secondColor, actualZoom);
+				this.drawOffset(i * 2, firstColor);
+				this.drawOffset(i * 2 + 1, secondColor);
 		}
 	}
 
-	drawOffset(context, offset, chosenColor, zoom) {
+	drawOffset(offset, chosenColor) {
 		let x = (offset % 32);
 		let y = Math.floor(offset / 32);
-		this.drawPixel(context, x, y, chosenColor, zoom);
+		this.drawPixel(x, y, chosenColor);
 	}
 
-	drawPixel(context, x, y, chosenColor, zoom) {
+	drawPixel(x, y, chosenColor) {
+		let context = this.context;
+		let zoom = this.actualZoom;
+
 		if (y > 63) {
 			y-= 64; x+= 32;
 		}
-		try {
-			context.fillStyle = ACNL.paletteBinToHex[this.props.swatch[chosenColor]];
-			context.fillRect(x * zoom, y * zoom, zoom, zoom);
-			if (zoom > 5) {
-				context.fillStyle = "#AAAAAA";
-				context.fillRect(x * zoom + zoom - 1, y * zoom, 1, zoom);
-				context.fillRect(x * zoom, y * zoom + zoom - 1, zoom, 1);
-			}
-		} catch(e) {};
+
+		context.fillStyle = ACNL.paletteBinToHex[this.props.swatch[chosenColor]];
+		context.fillRect(x * zoom, y * zoom, zoom, zoom);
+		if (zoom > 5) {
+			context.fillStyle = "#AAAAAA";
+			context.fillRect(x * zoom + zoom - 1, y * zoom, 1, zoom);
+			context.fillRect(x * zoom, y * zoom + zoom - 1, zoom, 1);
+		}
 	}
 
 	// can't call draw inside render b/c on the first render
 	// there's no reference to the actual node
 	componentDidMount() {
-		this.drawPatterns();
+		this.updateContext();
 		this.updateBoundingClientRect();
+		this.drawPatterns();
 		// attaching event handlers
 		window.addEventListener("scroll", this.updateBoundingClientRect.bind(this));
 		window.addEventListener("resize", this.updateBoundingClientRect.bind(this));
 	}
 
+	// only fully re-render when pattern is updated or swatch colors change
+	// only occurs after editor applies refresh changes
+	shouldComponentUpdate(nextProps, nextState) {
+		if (this.props.patterns !== nextProps.patterns) return true;
+		if (this.props.swatch !== nextProps.swatch) return true;
+		if (this.props.chosenColor !== nextProps.chosenColor) return true;
+		return false;
+	}
+
+	// upon re-rendering, update the context since technically new canvas
 	componentDidUpdate() {
+		this.updateContext();
 		this.drawPatterns();
 	}
 
@@ -150,9 +157,11 @@ class EditorCanvas extends React.Component {
 				id = {id}
 				width = {size}
 				height = {size}
+
+				onClick = {this.onClick.bind(this)}
 				onMouseDown = {this.onMouseDown.bind(this)}
-				onMouseUp = {this.onMouseUp.bind(this)}
 				onMouseMove = {this.onMouseMove.bind(this)}
+				onMouseUp = {this.onMouseUp.bind(this)}
 			>
 			</canvas>
 		);

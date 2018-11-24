@@ -15,7 +15,25 @@ class Editor extends React.Component {
 		this.state = {
 			acnl: new ACNL(),
  			chosenColor: 0,
+			isDrawing: false,
+			pixelBuffer: [],
+			pixelRefreshTimer: null,
+			canvases: [
+				React.createRef(),
+				React.createRef(),
+				React.createRef()
+			],
+			qrRefreshTimer: null,
 		};
+	}
+
+	// canvas will need this to draw and drag across and between multiple canvases
+	setIsDrawing(isDrawing) {
+		if (isDrawing !== this.state.isDrawing) {
+			this.setState({
+				isDrawing: isDrawing,
+			});
+		}
 	}
 
 	// draw
@@ -66,10 +84,69 @@ class Editor extends React.Component {
 		}
 	}
 
+	// store changes
+	// need to guarantee a pixel refresh (complete update to ACNL) sometime
+	updatePixelBuffer(x, y, isTriggeringRefresh) {
+		// console.log("cleared from update", this.state.pixelRefreshTimer);
+		// if not setting timer, this will clear the last timer set
+		window.clearTimeout(this.state.pixelRefreshTimer);
+
+		// cannot slice buffer else race conditions occur
+		// need to mutate :(
+		let pixelBuffer = this.state.pixelBuffer.slice();
+		pixelBuffer.push([x, y]);
+
+		let chosenColor = this.state.chosenColor;
+		for (let i = 0; i < this.state.canvases.length; ++i) {
+			this.state.canvases[i].current.drawPixel(x, y, chosenColor);
+		}
+
+		// decide how to guarantee pixel refresh, timer or immediate
+		if (!isTriggeringRefresh) {
+			let pixelRefreshTimer = window.setTimeout(() => {
+				// console.log("from timer", pixelRefreshTimer);
+				this.triggerPixelRefresh();
+			}, 500);
+			// console.log("set timer", pixelRefreshTimer);
+			this.setState({
+				pixelBuffer: pixelBuffer,
+				pixelRefreshTimer: pixelRefreshTimer,
+			});
+		}
+		else {
+			// setState supports callbacks
+			// will guarantee latest pixelBuffer
+			this.setState(
+				{
+					pixelBuffer: pixelBuffer,
+				},
+				() => this.triggerPixelRefresh()
+			);
+		}
+	}
+
+	// batch apply changes
+	triggerPixelRefresh() {
+		let pixelBuffer = this.state.pixelBuffer.slice();
+		// console.log(pixelBuffer);
+		this.colorPixels(pixelBuffer);
+		this.setState({
+			pixelBuffer: [],
+		});
+		// console.log("refreshed, synced");
+	}
+
+	shouldComponentUpdate(nextProps, nextState) {
+		// only update allow update editor after refresh
+		if (nextState.pixelBuffer.length === 0) return true;
+		else return false;
+	}
+
 	render() {
 		let acnl = this.state.acnl;
 		let chosenColor = this.state.chosenColor;
 		let isDrawing = this.state.isDrawing;
+		let canvases = this.state.canvases;
 
 		return (
 			<div className="editor">
@@ -81,7 +158,11 @@ class Editor extends React.Component {
 						patterns = {acnl.patterns}
 						isProPattern = {acnl.isProPattern()}
 						chosenColor = {chosenColor}
-						updatePixels = {this.colorPixels.bind(this)}
+						isDrawing = {isDrawing}
+						setIsDrawing = {this.setIsDrawing.bind(this)}
+						updatePixelBuffer = {this.updatePixelBuffer.bind(this)}
+						triggerPixelRefresh = {this.triggerPixelRefresh.bind(this)}
+						ref = {canvases[0]}
 					/>
 
 					<EditorCanvas
@@ -91,10 +172,14 @@ class Editor extends React.Component {
 						patterns = {acnl.patterns}
 						isProPattern = {acnl.isProPattern()}
 						chosenColor = {chosenColor}
-						updatePixels = {this.colorPixels.bind(this)}
+						isDrawing = {isDrawing}
+						setIsDrawing = {this.setIsDrawing.bind(this)}
+						updatePixelBuffer = {this.updatePixelBuffer.bind(this)}
+						triggerPixelRefresh = {this.triggerPixelRefresh.bind(this)}
+						ref = {canvases[1]}
 					/>
-
 				</div>
+
 				<EditorCanvas
 					size = {512}
 					zoom = {5}
@@ -102,7 +187,11 @@ class Editor extends React.Component {
 					patterns = {acnl.patterns}
 					isProPattern = {acnl.isProPattern()}
 					chosenColor = {chosenColor}
-					updatePixels = {this.colorPixels.bind(this)}
+					isDrawing = {isDrawing}
+					setIsDrawing = {this.setIsDrawing.bind(this)}
+					updatePixelBuffer = {this.updatePixelBuffer.bind(this)}
+					triggerPixelRefresh = {this.triggerPixelRefresh.bind(this)}
+					ref = {canvases[2]}
 				/>
 
 				<EditorSwatch
@@ -115,7 +204,7 @@ class Editor extends React.Component {
 					chosenBinColor = {acnl.swatch[chosenColor]}
 					onClick = {this.selectPaletteColor.bind(this)}
 				/>
-
+				
 			</div>
 		);
 	}
