@@ -4,8 +4,9 @@ import EditorPalette from './EditorPalette.jsx';
 import EditorSwatch from './EditorSwatch.jsx';
 import EditorQRCode from './EditorQRCode.jsx';
 
-// js imports
+// regular js imports
 import ACNL from './acnl.js';
+
 
 // control center for all editor things
 // maintains control for drawing and data
@@ -42,7 +43,7 @@ class Editor extends React.Component {
 	selectSwatchColor(newChosenColor) {
 		// before switching colors, need to empty pixelBuffer
 		// each pixelBuffer is specific to the chosen color
-		// gotta make sure colorPixels doesn't run before selecting swatch color
+		// gotta make sure colorPixels doesn't run after selecting swatch color
 		this.refreshPixels(() => {
 			let chosenColor = this.state.chosenColor;
 			if (chosenColor !== newChosenColor) {
@@ -75,14 +76,12 @@ class Editor extends React.Component {
 	}
 
 	// store changes
-	// need to guarantee a pixel refresh (complete update to ACNL) sometime
+	// need to guarantee a pixel refresh (complete update to ACNL file) sometime
 	// support for multi-pixel drawing tools e.g. bucket, bigger pen sizes
 	// by adding specific pixels
-	updatePixelBuffer(x, y, isTriggeringRefresh) {
+	updatePixelBuffer(x, y) {
 		this.clearQRCodeTimer();
 		this.clearPixelRefreshTimer();
-		// console.log("cleared from update", this.state.pixelRefreshTimer);
-		// if not setting timer, this will clear the last timer set
 
 		// mousemove might be called "too quickly" and add the last pixel twice
 		// do not handle duplicate pixels in the last pos of the buffer
@@ -96,31 +95,23 @@ class Editor extends React.Component {
 			pixelBuffer.push([x, y]);
 			let chosenColor = this.state.chosenColor;
 			for (let i = 0; i < this.state.canvases.length; ++i) {
+				this.state.canvases[i].current.updateContext();
+				// losing context here, update context right before drawing
+				// not much time spent updating context anyway
+				// KEEP CONTEXT CACHED for full re-render speed
 				this.state.canvases[i].current.drawPixel(x, y, chosenColor);
 			}
 		}
-
-		// decide how to guarantee pixel refresh, timer or immediate
-		if (!isTriggeringRefresh) {
-			this.setPixelRefreshTimer();
-			// console.log("set timer", pixelRefreshTimer);
-			this.setState({
-				pixelBuffer: pixelBuffer,
-				shouldQRCodeUpdate: false,
-			});
-		}
-
 		else {
-			// setState supports callbacks
-			// will guarantee latest pixelBuffer
-			this.setState(
-				{
-					pixelBuffer: pixelBuffer,
-					shouldQRCodeUpdate: false,
-				},
-				() => this.refreshPixels()
-			);
+			return;
 		}
+
+		this.setPixelRefreshTimer();
+
+		this.setState({
+			pixelBuffer: pixelBuffer,
+			shouldQRCodeUpdate: false,
+		});
 	}
 
 	// batch apply changes in pixel buffer

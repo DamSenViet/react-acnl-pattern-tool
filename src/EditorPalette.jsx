@@ -52,6 +52,11 @@ class EditorPalette extends React.Component {
 		);
 	}
 
+	shouldComponentUpdate(nextProps, nextState) {
+		if (this.props.chosenBinColor !== nextProps.chosenBinColor) return true;
+		return false;
+	}
+
 	render() {
 		// PROCEDURALLY GENERATING PALETTE
 		let colorBlocks = [];

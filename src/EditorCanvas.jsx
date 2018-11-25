@@ -21,8 +21,6 @@ class EditorCanvas extends React.Component {
 		// also cache context for speed
 		this.boundingClientRect = null;
 		this.context = null;
-
-		// no real state here
 	}
 
 	updateContext() {
@@ -35,7 +33,7 @@ class EditorCanvas extends React.Component {
 		this.boundingClientRect = boundingClientRect;
 	}
 
-	draw(event, isTriggeringRefresh) {
+	draw(event) {
 		let actualZoom = this.actualZoom;
 		let boundingClientRect = this.boundingClientRect;
 		let x = event.pageX - boundingClientRect.left - window.scrollX;
@@ -44,11 +42,11 @@ class EditorCanvas extends React.Component {
 		x = Math.floor(x / actualZoom);
 		y = Math.floor(y / actualZoom);
 
-		// console.log(x, y, isTriggeringRefresh);
 		// browser will attempt to dump mousemove event before it completes
 		// if handler is not fast enough, need to ensure speed, using buffers
-		this.props.updatePixelBuffer(x, y, isTriggeringRefresh);
-		// buffer will do it's own internal check for last pos duplicates
+		// console.log(x, y);
+		this.props.updatePixelBuffer(x, y);
+		// buffer will do it's own internal check for last pixel duplicates
 		// since mousemove might be too fast for it's own good sometimes
 	}
 
@@ -57,9 +55,7 @@ class EditorCanvas extends React.Component {
 	// refresh, and kill timers to force refresh
 	onClick(event) {
 		// console.log("mouse click");
-		// these both will create race conditions in editor since they occur
-		// using async callbacks to resolve race condition
-		this.draw(event, true);
+		this.draw(event);
 	}
 
 	onMouseDown(event) {
@@ -70,14 +66,14 @@ class EditorCanvas extends React.Component {
 	onMouseMove(event) {
 		let isDrawing = this.props.isDrawing;
 		if (isDrawing && event.buttons === 1) {
-			this.draw(event, false);
+			this.draw(event);
 		}
 	}
 
 	// WILL NOT TRIGGER IF MOUSEUP OUTSIDE OF CANVAS ELEMENTS
-	// timer exists in the editor to back up the manual triggerPixelRefresh
+	// timer exists in the editor to force refresh
+	// mouseup triggers before mouseclick
 	onMouseUp(event) {
-		// mouseup triggers before mouseclick
 		// console.log("mouse up");
 		this.props.setIsDrawing(false);
 	}
@@ -120,6 +116,7 @@ class EditorCanvas extends React.Component {
 
 	// can't call draw inside render b/c on the first render
 	// there's no reference to the actual node
+	// create reference
 	componentDidMount() {
 		this.updateContext();
 		this.updateBoundingClientRect();
@@ -137,17 +134,16 @@ class EditorCanvas extends React.Component {
 		// manually check swatch b/c of object instance comparison
 		// if swatch has changed, colors have changed
 		// doesn't work for some reason, throwing error for context
-		// for (let i = 0; i < 15; ++i) {
-		// 	if (this.props.swatch[i] !== nextProps.swatch[i]) return true;
-		// }
-
-		if (this.props.swatch !== nextProps.swatch) return true;
+		for (let i = 0; i < 15; ++i) {
+			if (this.props.swatch[i] !== nextProps.swatch[i]) return true;
+		}
 
 		return false;
 	}
 
 	componentDidUpdate(prevProps, prevState, snapshot) {
-		// upon re-rendering, update the context since technically new canvas
+		// upon re-rendering, update the context and bounds since technically new
+		// canvas, redraw patterns too
 		this.updateContext();
 		this.updateBoundingClientRect();
 		this.drawPatterns();
@@ -167,18 +163,16 @@ class EditorCanvas extends React.Component {
 		if (zoom === 2) id += "_zoom";
 		else if (zoom === 5) id += "_zoomier";
 
-		// fragmented (since there's no wrapper on the sibling elements)
 		return (
 			<canvas
-				ref = {this.canvas}
 				id = {id}
 				width = {size}
 				height = {size}
-
 				onClick = {this.onClick.bind(this)}
 				onMouseDown = {this.onMouseDown.bind(this)}
 				onMouseMove = {this.onMouseMove.bind(this)}
 				onMouseUp = {this.onMouseUp.bind(this)}
+				ref = {this.canvas}
 			>
 			</canvas>
 		);

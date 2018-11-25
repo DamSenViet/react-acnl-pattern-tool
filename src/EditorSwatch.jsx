@@ -18,7 +18,6 @@ class EditorSwatchColor extends React.Component {
 		}
 	}
 
-
 	render() {
 		const isPicked = this.props.isPicked;
 		const className = (isPicked)? "col_block picked" : "col_block";
@@ -53,7 +52,18 @@ class EditorSwatch extends React.Component {
 		);
 	}
 
+	shouldComponentUpdate(nextProps, nextState) {
+		if (this.props.chosenColor !== nextProps.chosenColor) return true;
+		// check swatch
+		for (let i = 0; i < 15; ++i) {
+			if (this.props.swatch[i] !== nextProps.swatch[i]) return true;
+		}
+
+		return false;
+	}
+
 	render() {
+		// console.log("rendered swatch");
 		return (
 			<div id="colors">
 		    <div className="col_row">

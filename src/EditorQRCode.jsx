@@ -14,7 +14,6 @@ class EditorQRCode extends React.Component {
 
 	// control update, only update qr code when told
 	shouldComponentUpdate(nextProps, nextState) {
-		// props are updated every cycle, cannot check props data
 		return nextProps.shouldQRCodeUpdate;
 	}
 

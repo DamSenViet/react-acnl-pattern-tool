@@ -44,11 +44,12 @@ When drawing, the ACNL file is modified while drawing. However, the file modific
 
 The `pixelBuffer` also prevents the additions of pixels that match the last added pixel in the buffer. This is useful when the user is slowly drawing and the `mousemove` will generate draws on the same pixel more than once.
 
-Re-renders have also been further reduced by manually controlling component updates conditions via `shouldComponentUpdate()` in the canvas and qrcode generators.
+Re-renders have also been further reduced by manually controlling component updates conditions via `shouldComponentUpdate()` all components.
 
 The qr code generators no longer probe for the `typeNumber` and use hardcoded typeNumbers to reduce runtime.
 
 Expensive operations such as `DOMNode.getBoundingClientRect()` and `getContext("2d")` have all been cached into the canvas components and can now conditionally update when necessary (via resize/scrolling or re-rendering respectively).
+
 
 ## Additional Notes
 
