@@ -1,35 +1,32 @@
 import React from 'react';
-import qrcode from 'qrcode-generator';
+import thingy from './qrcode.js';
 
 
 class EditorQRCode extends React.Component {
-	// control update, only update qr code when told to
+	createQRCode(data, typeNumber, multipartNum,
+		multipartTotal, multipartParity) {
+
+		let qr = thingy(typeNumber, "L", multipartNum, multipartTotal, multipartParity);
+		qr.addData(data);
+		qr.make();
+		return qr;
+	}
+
+	// control update, only update qr code when told
 	shouldComponentUpdate(nextProps, nextState) {
-		// console.log(nextProps.shouldQRCodeUpdate);
+		// props are updated every cycle, cannot check props data
 		return nextProps.shouldQRCodeUpdate;
 	}
 
-
-	createQRCode(data) {
-		for (let i = 2; i <= 40; ++i) {
-			try {
-				let qr = qrcode(i, "L");
-				qr.addData(data);
-				qr.make();
-				return qr;
-			}
-			catch (error) {};
-		}
-	}
-
 	render() {
+		// console.log("rendered QR code");
 		let data = this.props.data;
 		let isProPattern = this.props.isProPattern;
 		let patternImgs = [];
 
 		if (isProPattern) {
-			for (let i = 0x00; i < 0x870; i+= 0x21C) {
-				let qr = this.createQRCode(data.substr(i, 0x21C));
+			for (let i = 0; i < 4; ++i) {
+				let qr = this.createQRCode(data.substr(0x21C * i, 0x21C), 16, i, 3, 0x77);
 				patternImgs.push(
 					<div
 						dangerouslySetInnerHTML = {{__html: qr.createImgTag(5)}}
@@ -40,7 +37,8 @@ class EditorQRCode extends React.Component {
 			}
 		}
 		else {
-			let qr = this.createQRCode(data);
+			// use all of data
+			let qr = this.createQRCode(data, 17);
 			patternImgs.push(
 				<div
 					dangerouslySetInnerHTML = {{__html: qr.createImgTag(5)}}

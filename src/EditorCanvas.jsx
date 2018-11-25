@@ -7,6 +7,11 @@ class EditorCanvas extends React.Component {
 		super(props);
 		this.canvas = React.createRef();
 
+		// not using state for this since these are technically static, but need
+		// to be updated as the DOM model updates
+		// cannot afford to be asynchronous, since these need to always be current
+		// e.g. boundingClientRect or context
+
 		let actualZoom;
 		if (this.props.isProPattern) actualZoom = this.props.size / 64;
 		else actualZoom = this.props.size / 32;
@@ -39,15 +44,17 @@ class EditorCanvas extends React.Component {
 		x = Math.floor(x / actualZoom);
 		y = Math.floor(y / actualZoom);
 
-		// console.log(x, y);
+		// console.log(x, y, isTriggeringRefresh);
 		// browser will attempt to dump mousemove event before it completes
 		// if handler is not fast enough, need to ensure speed, using buffers
 		this.props.updatePixelBuffer(x, y, isTriggeringRefresh);
+		// buffer will do it's own internal check for last pos duplicates
+		// since mousemove might be too fast for it's own good sometimes
 	}
 
 
 	// occurs as the last event in a click-n-drag, if it completes
-	// refresh, and kill timers
+	// refresh, and kill timers to force refresh
 	onClick(event) {
 		// console.log("mouse click");
 		// these both will create race conditions in editor since they occur
@@ -126,14 +133,23 @@ class EditorCanvas extends React.Component {
 	// only occurs after editor applies refresh changes
 	shouldComponentUpdate(nextProps, nextState) {
 		if (this.props.patterns !== nextProps.patterns) return true;
+
+		// manually check swatch b/c of object instance comparison
+		// if swatch has changed, colors have changed
+		// doesn't work for some reason, throwing error for context
+		// for (let i = 0; i < 15; ++i) {
+		// 	if (this.props.swatch[i] !== nextProps.swatch[i]) return true;
+		// }
+
 		if (this.props.swatch !== nextProps.swatch) return true;
-		if (this.props.chosenColor !== nextProps.chosenColor) return true;
+
 		return false;
 	}
 
-	// upon re-rendering, update the context since technically new canvas
-	componentDidUpdate() {
+	componentDidUpdate(prevProps, prevState, snapshot) {
+		// upon re-rendering, update the context since technically new canvas
 		this.updateContext();
+		this.updateBoundingClientRect();
 		this.drawPatterns();
 	}
 
@@ -143,6 +159,7 @@ class EditorCanvas extends React.Component {
 	}
 
 	render() {
+		// console.log("rendered canvas");
 		let size = this.props.size;
 		let zoom = this.props.zoom;
 

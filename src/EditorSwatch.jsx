@@ -18,6 +18,7 @@ class EditorSwatchColor extends React.Component {
 		}
 	}
 
+
 	render() {
 		const isPicked = this.props.isPicked;
 		const className = (isPicked)? "col_block picked" : "col_block";
