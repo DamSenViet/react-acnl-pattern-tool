@@ -2,11 +2,10 @@ import React from 'react';
 import EditorCanvas from './EditorCanvas.jsx';
 import EditorPalette from './EditorPalette.jsx';
 import EditorSwatch from './EditorSwatch.jsx';
-import EditorQRCode from './EditorQRCode.jsx';
+import EditorQrGenerator from './EditorQrGenerator.jsx';
 
 // regular js imports
 import ACNL from './acnl.js';
-
 
 // control center for all editor things
 // maintains control for drawing and data
@@ -26,7 +25,7 @@ class Editor extends React.Component {
 				React.createRef(),
 				React.createRef()
 			],
-			shouldQRCodeUpdate: false,
+			shouldQrCodeUpdate: false,
 			qrRefreshTimer: null,
 		};
 	}
@@ -50,7 +49,7 @@ class Editor extends React.Component {
 				// not setting QR timer here, because just changing colors
 				this.setState({
 					chosenColor: newChosenColor,
-					shouldQRCodeUpdate: false,
+					shouldQrCodeUpdate: false,
 				});
 			}
 		});
@@ -67,7 +66,7 @@ class Editor extends React.Component {
 				this.setState(
 					{
 						acnl: acnl,
-						shouldQRCodeUpdate: false,
+						shouldQrCodeUpdate: false,
 					},
 					() => this.setQRCodeTimer()
 				);
@@ -101,17 +100,15 @@ class Editor extends React.Component {
 				// KEEP CONTEXT CACHED for full re-render speed
 				this.state.canvases[i].current.drawPixel(x, y, chosenColor);
 			}
+			this.setPixelRefreshTimer();
+			this.setState({
+				pixelBuffer: pixelBuffer,
+				shouldQrCodeUpdate: false,
+			});
 		}
 		else {
-			return;
+			this.setPixelRefreshTimer();
 		}
-
-		this.setPixelRefreshTimer();
-
-		this.setState({
-			pixelBuffer: pixelBuffer,
-			shouldQRCodeUpdate: false,
-		});
 	}
 
 	// batch apply changes in pixel buffer
@@ -137,7 +134,7 @@ class Editor extends React.Component {
 			{
 				acnl: acnl,
 				pixelBuffer: [],
-				shouldQRCodeUpdate: false,
+				shouldQrCodeUpdate: false,
 			},
 			() => {
 				this.setQRCodeTimer();
@@ -162,7 +159,7 @@ class Editor extends React.Component {
 
 	refreshQRCode() {
 		this.setState({
-			shouldQRCodeUpdate: true,
+			shouldQrCodeUpdate: true,
 		});
 		// console.log("trigger QR refresh");
 	}
@@ -175,7 +172,7 @@ class Editor extends React.Component {
 		this.clearQRCodeTimer();
 		let qrRefreshTimer = window.setTimeout(() => {
 			this.refreshQRCode();
-		}, 3000);
+		}, 2500);
 		this.setState({
 			qrRefreshTimer: qrRefreshTimer,
 		});
@@ -188,12 +185,11 @@ class Editor extends React.Component {
 	}
 
 	render() {
-		// console.log('rendered editor');
 		let acnl = this.state.acnl;
 		let chosenColor = this.state.chosenColor;
 		let isDrawing = this.state.isDrawing;
 		let canvases = this.state.canvases;
-		let shouldQRCodeUpdate = this.state.shouldQRCodeUpdate;
+		let shouldQrCodeUpdate = this.state.shouldQrCodeUpdate;
 
 		return (
 			<div className="editor">
@@ -249,10 +245,10 @@ class Editor extends React.Component {
 					onClick = {this.selectPaletteColor.bind(this)}
 				/>
 
-				<EditorQRCode
+				<EditorQrGenerator
 					data = {acnl.data}
 					isProPattern = {acnl.isProPattern()}
-					shouldQRCodeUpdate = {shouldQRCodeUpdate}
+					shouldQrCodeUpdate = {shouldQrCodeUpdate}
 				/>
 			</div>
 		);

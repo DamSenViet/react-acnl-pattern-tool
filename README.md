@@ -27,28 +27,39 @@ The new architecture uses an MVC model. The controller interacts with the model 
 * Canvas
 * Swatch
 * Palette
-* QRCode
+* QR Code Generator
 
 Note: the term model will refer to the `ACNL` class from `acnl.js` which represents the ACNL file format used to save/render QR codes in Animal Crossing New Leaf (ACNL).
 
-Note: the term pixel in this write-up refers to a pattern pixel drawn onto the canvas (as the pattern size is 32x32 pixels or 64x64 pixels), not a physical or css pixel.
+Note: the term pixel in this write-up refers to a pattern pixel drawn onto the canvas (as the pattern size is 32x32 pixels and up to 4 patterns can exist on a canvas), not a physical or css pixel.
 
-The editor is the parent of the canvas, palette, and swatch, qrcode and acts as the main center of control. Component's cannot update each other directly, but must now communicate with the editor component in order to update other components and the model respectively. Figuratively, the 'editor' is a user that can manipulate both the model and the view. The 'editor' holds onto user information (e.g. current drawing color).
+The editor is the parent of the canvas, palette, swatch, and qr code generator. It acts as the main center of control. Component's cannot update each other directly, but must now communicate with the editor component in order to update other components and the model respectively. Figuratively, the 'editor' is a user that can manipulate both the model and the view. The 'editor' holds onto user information (e.g. current drawing color).
 
-The components themselves are now modular, easily allowing for additional modifications to be added. For example, pixel tools can be added in the form of a module. All they have to do is return a list of pixels that need to be colored in for the editor to handle via `updatePixelBuffer(x, y, isTriggeringRefreshing)`. It is now possible to introduce pen sizes and bucket tools. While this version does not use these modifications, the design of the application was made with this in mind and can be easily added as such.
-
+The components themselves are now modular, easily allowing for additional modifications to be added. For example, pixel tools can be added in the form of a module. All they have to do is return a list of pixels that need to be colored in for the editor to handle via `updatePixelBuffer(x, y)` (read into optimizations on the pixel buffer). It is now possible to introduce pen sizes and bucket tools. While this version does not use these modifications, the design of the application was made with this in mind and can be easily added as such.
 
 ## Optimizations
 
-When drawing, the ACNL file is modified while drawing. However, the file modifications are cached in a buffer (`pixelBuffer`) and then applied when the metaphorical editor is "free". This prevents full re-renders of the pattern, increasing the number of `mousemove` events the browser can fire without canceling. When applying the file modifications stored in the buffer, the editor syncs both the visual representation of the file (the pattern) and the file itself.
+### 1. The Pixel Buffer
+When the user is drawing on the canvas, there are two operations that need to be executed:
 
-The `pixelBuffer` also prevents the additions of pixels that match the last added pixel in the buffer. This is useful when the user is slowly drawing and the `mousemove` will generate draws on the same pixel more than once.
+1. the canvas needs to update itself to color in the pixel
+2. the ACNL file needs to have update itself to have the color of the pixel in the data changed
 
-Re-renders have also been further reduced by manually controlling component updates conditions via `shouldComponentUpdate()` all components.
+Since React will force a re-render (redrawing the entire pattern from scratch) when we modify the file and the render is expensive, this application now uses a `pixelBuffer` to store the necessary file modifications. The drawing is performed live while the changed pixels are cached to be applied to the file at a later time. `updatePixelBuffer(x, y)` will handle both the drawing and caching of the pixel that needs to be modified. It will also schedule the application of the file modifications in the `pixelBuffer` to a time when the user is free.
 
-The qr code generators no longer probe for the `typeNumber` and use hardcoded typeNumbers to reduce runtime.
+The `pixelBuffer` is specific to the chosen drawing color and will force the file to update when the chosen drawing color has changed.
 
-Expensive operations such as `DOMNode.getBoundingClientRect()` and `getContext("2d")` have all been cached into the canvas components and can now conditionally update when necessary (via resize/scrolling or re-rendering respectively).
+The `pixelBuffer` also prevents the additions of pixels that match the last added pixel in the buffer. This is useful when the user is slowly drawing and the `mousemove` will generate draws on the same pixel more than once. Although this helps reduce duplicates, it will not prevent duplicates pixels from existing in the buffer.
+
+### 2. More Caching
+
+Expensive operations such as `getBoundingClientRect()` and `getContext("2d")` have all been cached into the canvas components and can now conditionally update when necessary (via resize/scrolling or re-rendering respectively).
+
+### 3. Controlling Renders
+
+Re-renders have also been further reduced by manually controlling component update conditions via `shouldComponentUpdate()` on all components.
+
+The qr code generator no longer probes for the `typeNumber` and uses hardcoded `typeNumbers` to reduce runtime. The qr code generator now only updates the qr codes that have been affected by data changes.
 
 
 ## Additional Notes

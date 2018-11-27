@@ -46,8 +46,6 @@ class EditorCanvas extends React.Component {
 		// if handler is not fast enough, need to ensure speed, using buffers
 		// console.log(x, y);
 		this.props.updatePixelBuffer(x, y);
-		// buffer will do it's own internal check for last pixel duplicates
-		// since mousemove might be too fast for it's own good sometimes
 	}
 
 
