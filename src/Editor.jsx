@@ -9,6 +9,7 @@ import ACNL from './acnl.js';
 
 // control center for all editor things
 // maintains control for drawing and data
+// using async callback patterns (b/c setState is async)
 class Editor extends React.Component {
 	constructor(props) {
 		super(props);
@@ -55,7 +56,7 @@ class Editor extends React.Component {
 		});
 	}
 
-	// any time we make modifications to acnl data, need to to reset qr timer
+	// any time we make modifications to acnl data, need to reset qr timer
 	selectPaletteColor(newBinColor){
 		this.refreshPixels(() => {
 			let acnl = this.state.acnl.clone();
@@ -63,10 +64,13 @@ class Editor extends React.Component {
 			let chosenBinColor = acnl.swatch[chosenColor];
 			if (chosenBinColor !== newBinColor) {
 				acnl.setSwatchColor(chosenColor, newBinColor);
-				this.setState({
-					acnl: acnl,
-					shouldQrCodeUpdate: false,
-				});
+				this.setState(
+					{
+						acnl: acnl,
+						shouldQrCodeUpdate: false,
+					},
+					() => this.setQrCodeTimer()
+				);
 			}
 		});
 	}
@@ -107,6 +111,8 @@ class Editor extends React.Component {
 
 	// batch apply changes in pixel buffer
 	refreshPixels(callback) {
+		// e.g. selectPaletteColor & setSwatchColor, some don't need to set qr timer
+		// callback needs to manually set qr timer (to prevent duplicate setTimers)
 		this.clearQrCodeTimer();
 		let pixelBuffer = this.state.pixelBuffer.slice();
 		// if there's nothing in the buffer, no need to update
@@ -123,7 +129,7 @@ class Editor extends React.Component {
 			acnl.colorPixel(x, y, chosenColor);
 		}
 
-		// empty pixel buffer, set qr timer
+		// empty pixel buffer and update acnl
 		this.setState(
 			{
 				acnl: acnl,
@@ -132,19 +138,20 @@ class Editor extends React.Component {
 			},
 			() => {
 				if (callback) callback();
-				this.setQrCodeTimer();
 			}
 		);
 	}
 
 	clearPixelRefreshTimer() {
-		// no need to check, since this will be called too many times
+		// no need to check existence, since this will be called too many times
 		window.clearTimeout(this.state.pixelRefreshTimer);
 	}
 
 	setPixelRefreshTimer() {
 		let pixelRefreshTimer = window.setTimeout(() => {
-			this.refreshPixels();
+			this.refreshPixels(() => {
+				this.setQrCodeTimer()
+			});
 		}, 500);
 		this.setState({
 			pixelRefreshTimer: pixelRefreshTimer
