@@ -42,11 +42,11 @@ class Editor extends React.Component {
 	selectSwatchColor(newChosenColor) {
 		// before switching colors, need to empty pixelBuffer
 		// each pixelBuffer is specific to the chosen color
-		// gotta make sure colorPixels doesn't run after selecting swatch color
+		// gotta make sure pixels in buffer are colored with old color, not new one
 		this.refreshPixels(() => {
 			let chosenColor = this.state.chosenColor;
 			if (chosenColor !== newChosenColor) {
-				// not setting QR timer here, because just changing colors
+				// not setting Qr timer here, because just changing colors
 				this.setState({
 					chosenColor: newChosenColor,
 					shouldQrCodeUpdate: false,
@@ -55,7 +55,7 @@ class Editor extends React.Component {
 		});
 	}
 
-
+	// any time we make modifications to acnl data, need to to reset qr timer
 	selectPaletteColor(newBinColor){
 		this.refreshPixels(() => {
 			let acnl = this.state.acnl.clone();
@@ -63,13 +63,10 @@ class Editor extends React.Component {
 			let chosenBinColor = acnl.swatch[chosenColor];
 			if (chosenBinColor !== newBinColor) {
 				acnl.setSwatchColor(chosenColor, newBinColor);
-				this.setState(
-					{
-						acnl: acnl,
-						shouldQrCodeUpdate: false,
-					},
-					() => this.setQRCodeTimer()
-				);
+				this.setState({
+					acnl: acnl,
+					shouldQrCodeUpdate: false,
+				});
 			}
 		});
 	}
@@ -79,8 +76,7 @@ class Editor extends React.Component {
 	// support for multi-pixel drawing tools e.g. bucket, bigger pen sizes
 	// by adding specific pixels
 	updatePixelBuffer(x, y) {
-		this.clearQRCodeTimer();
-		this.clearPixelRefreshTimer();
+		this.clearQrCodeTimer();
 
 		// mousemove might be called "too quickly" and add the last pixel twice
 		// do not handle duplicate pixels in the last pos of the buffer
@@ -91,6 +87,7 @@ class Editor extends React.Component {
 			x !== pixelBuffer[pixelBufferLastIndex][0] ||
 			y !== pixelBuffer[pixelBufferLastIndex][1]
 		) {
+			this.clearPixelRefreshTimer();
 			pixelBuffer.push([x, y]);
 			let chosenColor = this.state.chosenColor;
 			for (let i = 0; i < this.state.canvases.length; ++i) {
@@ -106,14 +103,11 @@ class Editor extends React.Component {
 				shouldQrCodeUpdate: false,
 			});
 		}
-		else {
-			this.setPixelRefreshTimer();
-		}
 	}
 
 	// batch apply changes in pixel buffer
 	refreshPixels(callback) {
-		this.clearQRCodeTimer();
+		this.clearQrCodeTimer();
 		let pixelBuffer = this.state.pixelBuffer.slice();
 		// if there's nothing in the buffer, no need to update
 		if (pixelBuffer.length === 0) {
@@ -137,18 +131,18 @@ class Editor extends React.Component {
 				shouldQrCodeUpdate: false,
 			},
 			() => {
-				this.setQRCodeTimer();
 				if (callback) callback();
+				this.setQrCodeTimer();
 			}
 		);
 	}
 
 	clearPixelRefreshTimer() {
+		// no need to check, since this will be called too many times
 		window.clearTimeout(this.state.pixelRefreshTimer);
 	}
 
 	setPixelRefreshTimer() {
-		this.clearPixelRefreshTimer();
 		let pixelRefreshTimer = window.setTimeout(() => {
 			this.refreshPixels();
 		}, 500);
@@ -157,21 +151,26 @@ class Editor extends React.Component {
 		});
 	}
 
-	refreshQRCode() {
+	refreshQrCode() {
 		this.setState({
 			shouldQrCodeUpdate: true,
+			pixelRefreshTimer: null
 		});
-		// console.log("trigger QR refresh");
+		// console.log("trigger Qr refresh");
 	}
 
-	clearQRCodeTimer() {
-		window.clearTimeout(this.state.qrRefreshTimer);
+	clearQrCodeTimer() {
+		if (this.state.qrRefreshTimer) {
+			window.clearTimeout(this.state.qrRefreshTimer);
+			this.setState({
+				qrRefreshTimer: null,
+			});
+		}
 	}
 
-	setQRCodeTimer() {
-		this.clearQRCodeTimer();
+	setQrCodeTimer() {
 		let qrRefreshTimer = window.setTimeout(() => {
-			this.refreshQRCode();
+			this.refreshQrCode();
 		}, 2500);
 		this.setState({
 			qrRefreshTimer: qrRefreshTimer,

@@ -30,10 +30,9 @@ class EditorQrCode extends React.Component {
 		let qr = this.createQrCode(data, typeNumber, multipartNum, multipartTotal,
 			multipartParity);
 
-		console.log("rendered QR", multipartNum);
+		// console.log("rendered QR", multipartNum);
 		return (
 			<div
-				style = {{display: "inline-block"}}
 				dangerouslySetInnerHTML = {{__html: qr.createImgTag(5)}}
 			>
 			</div>
@@ -48,7 +47,7 @@ class EditorQrGenerator extends React.Component {
 	}
 
 	render() {
-		console.log("rendered QR code");
+		// console.log("rendered QR code");
 		let data = this.props.data;
 		let isProPattern = this.props.isProPattern;
 		let qrCodes = [];
