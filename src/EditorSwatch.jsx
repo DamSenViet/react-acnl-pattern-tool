@@ -19,10 +19,11 @@ class EditorSwatchColor extends React.Component {
 	}
 
 	render() {
-		const isPicked = this.props.isPicked;
-		const className = (isPicked)? "col_block picked" : "col_block";
-		const backgroundColor = { backgroundColor : this.props.color };
-		const onClick = this.props.onClick;
+		let isPicked = this.props.isPicked;
+		let className = "swatch-color";
+		if (isPicked) className += " picked";
+		let backgroundColor = { backgroundColor : this.props.color };
+		let onClick = this.props.onClick;
 
 		return (
 			<div
@@ -39,9 +40,9 @@ class EditorSwatchColor extends React.Component {
 
 class EditorSwatch extends React.Component {
 	renderColor(i) {
-		const isPicked = (this.props.chosenColor === i)
-		const binColor = this.props.swatch[i];
-		const color = ACNL.paletteBinToHex[binColor];
+		let isPicked = (this.props.chosenColor === i)
+		let binColor = this.props.swatch[i];
+		let color = ACNL.paletteBinToHex[binColor];
 
 		return (
 			<EditorSwatchColor
@@ -65,28 +66,28 @@ class EditorSwatch extends React.Component {
 	render() {
 		// console.log("rendered swatch");
 		return (
-			<div id="colors">
-		    <div className="col_row">
+			<div className="swatch">
+		    <div className="swatch-color-row">
 					{this.renderColor(0)}
 					{this.renderColor(1)}
 					{this.renderColor(2)}
 		    </div>
-		    <div className="col_row">
+		    <div className="swatch-color-row">
 					{this.renderColor(3)}
 					{this.renderColor(4)}
 					{this.renderColor(5)}
 		    </div>
-		    <div className="col_row">
+		    <div className="swatch-color-row">
 					{this.renderColor(6)}
 					{this.renderColor(7)}
 					{this.renderColor(8)}
 		    </div>
-		    <div className="col_row">
+		    <div className="swatch-color-row">
 					{this.renderColor(9)}
 					{this.renderColor(10)}
 					{this.renderColor(11)}
 		    </div>
-		    <div className="col_row">
+		    <div className="swatch-color-row">
 					{this.renderColor(12)}
 					{this.renderColor(13)}
 					{this.renderColor(14)}

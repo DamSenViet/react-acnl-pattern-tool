@@ -157,13 +157,13 @@ class EditorCanvas extends React.Component {
 		let size = this.props.size;
 		let zoom = this.props.zoom;
 
-		let id = "acnl_icon";
-		if (zoom === 2) id += "_zoom";
-		else if (zoom === 5) id += "_zoomier";
+		let className = "canvas";
+		if (zoom === 2) className += "-zoom";
+		else if (zoom === 5) className += "-zoomier";
 
 		return (
 			<canvas
-				id = {id}
+				className = {className}
 				width = {size}
 				height = {size}
 				onClick = {this.onClick.bind(this)}

@@ -55,7 +55,7 @@ class ACNL {
 
 	getByte(offset) {
 		this.checkDataAccess(offset);
-		return this.data.charCodeAt(0);
+		return this.data.charCodeAt(offset);
 	}
 
 	setByte(offset, val) {
@@ -146,13 +146,17 @@ class ACNL {
 		}
 
 		let left = this.getByte(offset);
-		let right = this.getByte(offset);
+		let right = this.getByte(offset + 1);
 		let val = (left << 8) + right;
 		val = val.toString(16);
 		return val;
 	}
 
-	setID(offset, str) {
+	setID(offset, str) {	
+		// verify input
+		// str might be empty, check that too
+		if (str === "" || str === '') str = "0x0000";
+
 		// verify offset
 		switch(offset) {
 			// user id
@@ -165,13 +169,24 @@ class ACNL {
 		let num = parseInt(str, 16);
 		// check if num is larger than 16 bits and valid
 		if (isNaN(num) || num >= 65536) {
-			throw new Error("not valid id data");
+			// get the smallest substr possible
+			for (let i = str.length; i >= 1; --i) {
+				num = parseInt(str.substr(0, i), 16);
+				if (!isNaN(num) && num < 65536) {
+					break;
+				}
+				// didn't pass check, last character 
+				else if (i === 1) {
+					throw new Error("input is not a valid id", str);
+				}
+			}
 		}
 
 		// store first byte's, then second
 		// & with 2 bytes of 1's in binary
 		// bit shifting to remove extra bits and pad with 0's in binary
 		// AND operator 0xFF leaves only the last 8 bits
+		// console.log("setting", num.toString(16));
 		this.setByte(offset, (num >> 8) & 0xFF);
 		this.setByte(offset + 1, num & 0xFF);
 	}

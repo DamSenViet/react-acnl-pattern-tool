@@ -18,10 +18,11 @@ class EditorPaletteColor extends React.Component {
 	}
 
 	render() {
-		const isPicked = this.props.isPicked;
-		const className = (isPicked)? "col_pal picked" : "col_pal";
-		const backgroundColor = { backgroundColor : this.props.color };
-		const onClick = this.props.onClick;
+		let isPicked = this.props.isPicked;
+		let className = "palette-color";
+		if (isPicked) className += " picked";
+		let backgroundColor = { backgroundColor : this.props.color };
+		let onClick = this.props.onClick;
 
 		return (
 			<div
@@ -67,7 +68,7 @@ class EditorPalette extends React.Component {
 			}
 
 			let colorBlock = (
-				<div className = "col_pal_block" key = {i.toString()}>
+				<div className = "palette-color-block" key = {i.toString()}>
 					{colors}
 				</div>
 			);
@@ -81,7 +82,7 @@ class EditorPalette extends React.Component {
 			greyColors.push(this.renderColor(i));
 		}
 		let greyColorBlock = (
-			<div className = "col_pal_row" key = {"10"}>
+			<div className = "palette-color-row" key = {"10"}>
 				{greyColors}
 			</div>
 		);
@@ -89,7 +90,7 @@ class EditorPalette extends React.Component {
 
 
 		return (
-			<div id="color_pal">{colorBlocks}</div>
+			<div className="palette">{colorBlocks}</div>
 		);
 	}
 }

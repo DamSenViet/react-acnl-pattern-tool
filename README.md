@@ -1,6 +1,11 @@
-A React.js port of [Animal Crossing New Leaf Pattern Tool](https://thulinma.com/acnl/) by [Thulinma]([Thulinma's](https://github.com/Thulinma)
+A React.js port of [Animal Crossing New Leaf Pattern Tool](https://thulinma.com/acnl/) by [Thulinma](https://github.com/Thulinma)
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+
+## Stack
+
+* [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator)
+
 
 ## Available Scripts
 

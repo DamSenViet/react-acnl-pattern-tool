@@ -47,7 +47,7 @@ class EditorQrGenerator extends React.Component {
 	}
 
 	render() {
-		// console.log("rendered QR code");
+		console.log("rendered");
 		let data = this.props.data;
 		let isProPattern = this.props.isProPattern;
 		let qrCodes = [];
@@ -79,7 +79,7 @@ class EditorQrGenerator extends React.Component {
 		}
 
 		return (
-			<div>{qrCodes}</div>
+			<div className="qr-code-container">{qrCodes}</div>
 		);
 	}
 }

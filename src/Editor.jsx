@@ -3,6 +3,7 @@ import EditorCanvas from './EditorCanvas.jsx';
 import EditorPalette from './EditorPalette.jsx';
 import EditorSwatch from './EditorSwatch.jsx';
 import EditorQrGenerator from './EditorQrGenerator.jsx';
+import EditorMetadata from './EditorMetadata.jsx';
 
 // regular js imports
 import ACNL from './acnl.js';
@@ -184,8 +185,91 @@ class Editor extends React.Component {
 		});
 	}
 
+
+	// deal with metadata
+	
+	updatePatternTitle(title) {
+		this.clearQrCodeTimer();
+
+		let acnl = this.state.acnl.clone();
+		if (acnl.patternTitle !== title) {
+			acnl.patternTitle = title;
+			this.setState(
+				{
+					acnl: acnl,
+					shouldQrCodeUpdate: false,
+				},
+				() => this.setQrCodeTimer()
+			);
+		}
+	}
+
+	updateUserName(name) {
+		this.clearQrCodeTimer();
+		
+		let acnl = this.state.acnl.clone();
+		if (acnl.userName !== name) {
+			acnl.userName = name;
+			this.setState(
+				{
+					acnl: acnl,
+					shouldQrCodeUpdate: false,
+				},
+				() => this.setQrCodeTimer()
+			);
+		}
+	}
+
+	updateUserID(id) {
+		this.clearQrCodeTimer();
+
+		let acnl = this.state.acnl.clone();
+		if (acnl.userID !== id) {
+			acnl.userID = id ;
+			this.setState(
+				{
+					acnl: acnl,
+					shouldQrCodeUpdate: false,
+				},
+				() => this.setQrCodeTimer()
+			);
+		}
+	}
+
+	updateTownName(name) {
+		this.clearQrCodeTimer();
+
+		let acnl = this.state.acnl.clone();
+		if (acnl.townName !== name) {
+			acnl.townName = name;
+			this.setState(
+				{
+					acnl: acnl,
+					shouldQrCodeUpdate: false,
+				},
+				() => this.setQrCodeTimer()
+			);
+		}
+	}
+
+	updateTownID(id) {
+		this.clearQrCodeTimer();
+
+		let acnl = this.state.acnl.clone();
+		if (acnl.townID !== id) {
+			acnl.townID = id;
+			this.setState(
+				{
+					acnl: acnl,
+					shouldQrCodeUpdate: false,
+				},
+				() => this.setQrCodeTimer()
+			);
+		}
+	}
+
 	shouldComponentUpdate(nextProps, nextState) {
-		// only update after refresh
+		// only render after refreshing pixels
 		if (nextState.pixelBuffer.length === 0) return true;
 		else return false;
 	}
@@ -199,7 +283,7 @@ class Editor extends React.Component {
 
 		return (
 			<div className="editor">
-				<div id="canvas_editor">
+				<div className="canvas-container">
 					<EditorCanvas
 						size = {64}
 						zoom = {1}
@@ -250,6 +334,22 @@ class Editor extends React.Component {
 					chosenBinColor = {acnl.swatch[chosenColor]}
 					onClick = {this.selectPaletteColor.bind(this)}
 				/>
+
+
+			<EditorMetadata
+					patternTitle = {acnl.patternTitle}
+					userName = {acnl.userName}
+					userID = {acnl.userID}
+					townName = {acnl.townName}
+					townID = {acnl.townID}
+
+					updatePatternTitle = {this.updatePatternTitle.bind(this)}
+					updateUserName = {this.updateUserName.bind(this)}
+					updateUserID = {this.updateUserID.bind(this)}
+					updateTownName = {this.updateTownName.bind(this)}
+					updateTownID = {this.updateTownID.bind(this)}
+				/>
+
 
 				<EditorQrGenerator
 					data = {acnl.data}
