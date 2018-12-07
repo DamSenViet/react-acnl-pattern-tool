@@ -10,7 +10,7 @@ class EditorMetadata extends React.Component {
 			this.props.userID !== nextProps.userID ||
 			this.props.townName !== nextProps.townName ||
 			this.props.townID !== nextProps.townID
-		) return true
+		) return true;
 		return false;
 	}
 
