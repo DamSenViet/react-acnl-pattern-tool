@@ -7,18 +7,12 @@ class EditorCanvas extends React.Component {
 		super(props);
 		this.canvas = React.createRef();
 
-		// not using state for this since these are technically static, but need
-		// to be updated as the DOM model updates
+		// not using state for these since these are technically static
+		// to be updated as the DOM model updates/moves
 		// cannot afford to be asynchronous, since these need to always be current
 		// e.g. boundingClientRect or context
-
-		let actualZoom;
-		if (this.props.isProPattern) actualZoom = this.props.size / 64;
-		else actualZoom = this.props.size / 32;
-		this.actualZoom = actualZoom;
-
 		// caching rect to prevent reflows and save cpu
-		// also cache context for speed
+		// also cache context for speed on full-redraws
 		this.boundingClientRect = null;
 		this.context = null;
 	}
@@ -34,7 +28,7 @@ class EditorCanvas extends React.Component {
 	}
 
 	draw(event) {
-		let actualZoom = this.actualZoom;
+		let actualZoom = this.props.actualZoom;
 		let boundingClientRect = this.boundingClientRect;
 		let x = event.pageX - boundingClientRect.left - window.scrollX;
 		let y = event.pageY - boundingClientRect.top - window.scrollY;
@@ -44,6 +38,7 @@ class EditorCanvas extends React.Component {
 
 		// browser will attempt to dump mousemove event before it completes
 		// if handler is not fast enough, need to ensure speed, using buffers
+		// updatePixelBuffer will command all canvases to draw the pixels too
 		// console.log(x, y);
 		this.props.updatePixelBuffer(x, y);
 	}
@@ -97,7 +92,7 @@ class EditorCanvas extends React.Component {
 
 	drawPixel(x, y, chosenColor) {
 		let context = this.context;
-		let zoom = this.actualZoom;
+		let zoom = this.props.actualZoom;
 
 		if (y > 63) {
 			y-= 64; x+= 32;
@@ -155,11 +150,12 @@ class EditorCanvas extends React.Component {
 	render() {
 		// console.log("rendered canvas");
 		let size = this.props.size;
-		let zoom = this.props.zoom;
+		let canvasNumber = this.props.canvasNumber;
 
 		let className = "canvas";
-		if (zoom === 2) className += "-zoom";
-		else if (zoom === 5) className += "-zoomier";
+		if (canvasNumber === 0) void(0);
+		else if (canvasNumber === 1) className += "-zoom";
+		else if (canvasNumber === 2) className += "-zoomier";
 
 		return (
 			<canvas

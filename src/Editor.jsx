@@ -2,8 +2,9 @@ import React from 'react';
 import EditorCanvas from './EditorCanvas.jsx';
 import EditorPalette from './EditorPalette.jsx';
 import EditorSwatch from './EditorSwatch.jsx';
-import EditorQrGenerator from './EditorQrGenerator.jsx';
 import EditorMetadata from './EditorMetadata.jsx';
+import EditorImporter from './EditorImporter.jsx';
+import EditorQrGenerator from './EditorQrGenerator.jsx';
 
 // regular js imports
 import ACNL from './acnl.js';
@@ -261,11 +262,30 @@ class Editor extends React.Component {
 			this.setState(
 				{
 					acnl: acnl,
+					pixelRefreshTimer: null,
 					shouldQrCodeUpdate: false,
 				},
 				() => this.setQrCodeTimer()
 			);
 		}
+	}
+
+	// replace entire acnl and state
+	import(acnlData) {
+		this.clearPixelRefreshTimer();
+		this.clearQrCodeTimer();
+		this.setState(
+			{
+				acnl: new ACNL(acnlData),
+				chosenColor: 0,
+				isDrawing: false,
+				pixelBuffer: [],
+				pixelRefreshTimer: null,
+				shouldQrCodeUpdate: false,
+				qrRefreshTimer: null,
+			},
+			() => this.setQrCodeTimer()
+		);
 	}
 
 	shouldComponentUpdate(nextProps, nextState) {
@@ -279,14 +299,22 @@ class Editor extends React.Component {
 		let chosenColor = this.state.chosenColor;
 		let isDrawing = this.state.isDrawing;
 		let canvases = this.state.canvases;
+		let canvasSizes = [64, 128, 512];
+		let actualZooms = canvasSizes.map((size) => {
+			if (acnl.isProPattern()) return size/64;
+			else return size/32;
+		});
+
 		let shouldQrCodeUpdate = this.state.shouldQrCodeUpdate;
+
 
 		return (
 			<div className="editor">
 				<div className="canvas-container">
 					<EditorCanvas
 						size = {64}
-						zoom = {1}
+						canvasNumber = {0}
+						actualZoom = {actualZooms[0]}
 						swatch = {acnl.swatch}
 						patterns = {acnl.patterns}
 						isProPattern = {acnl.isProPattern()}
@@ -299,7 +327,8 @@ class Editor extends React.Component {
 
 					<EditorCanvas
 						size = {128}
-						zoom = {2}
+						canvasNumber = {1}
+						actualZoom = {actualZooms[1]}
 						swatch = {acnl.swatch}
 						patterns = {acnl.patterns}
 						isProPattern = {acnl.isProPattern()}
@@ -313,7 +342,8 @@ class Editor extends React.Component {
 
 				<EditorCanvas
 					size = {512}
-					zoom = {5}
+					canvasNumber = {2}
+					actualZoom = {actualZooms[2]}
 					swatch = {acnl.swatch}
 					patterns = {acnl.patterns}
 					isProPattern = {acnl.isProPattern()}
@@ -336,7 +366,7 @@ class Editor extends React.Component {
 				/>
 
 
-			<EditorMetadata
+				<EditorMetadata
 					patternTitle = {acnl.patternTitle}
 					userName = {acnl.userName}
 					userID = {acnl.userID}
@@ -350,6 +380,9 @@ class Editor extends React.Component {
 					updateTownID = {this.updateTownID.bind(this)}
 				/>
 
+				<EditorImporter
+					import = {this.import.bind(this)}
+				/>
 
 				<EditorQrGenerator
 					data = {acnl.data}

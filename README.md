@@ -1,10 +1,12 @@
-A React.js port of [Animal Crossing New Leaf Pattern Tool](https://thulinma.com/acnl/) by [Thulinma](https://github.com/Thulinma)
+A React.js port of [Animal Crossing New Leaf Pattern Tool](https://github.com/Thulinma/ACNLPatternTool) by [Thulinma](https://github.com/Thulinma)
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Stack
 
-* [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator)
+* [file-saver](https://github.com/eligrey/FileSaver.js/) (writing out a binary file)
+* [jsqrcode](https://github.com/LazarSoft/jsqrcode) (reading in qr codes)
+* [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) (generating qr codes)
 
 
 ## Available Scripts
@@ -38,7 +40,7 @@ Note: the term model will refer to the `ACNL` class from `acnl.js` which represe
 
 Note: the term pixel in this write-up refers to a pattern pixel drawn onto the canvas (as the pattern size is 32x32 pixels and up to 4 patterns can exist on a canvas), not a physical or css pixel.
 
-The editor is the parent of the canvas, palette, swatch, and qr code generator. It acts as the main center of control. Component's cannot update each other directly, but must now communicate with the editor component in order to update other components and the model respectively. Figuratively, the 'editor' is a user that can manipulate both the model and the view. The 'editor' holds onto user information (e.g. current drawing color).
+The editor is the parent of the canvas, palette, swatch, and qr code generator. It acts as the main center of control. Components cannot update each other directly, but must now communicate with the editor component in order to update other components and the model respectively. Figuratively, the 'editor' is a user that can manipulate both the model and the view. The 'editor' holds onto user information (e.g. current drawing color).
 
 The components themselves are now modular, easily allowing for additional modifications to be added. For example, pixel tools can be added in the form of a module. All they have to do is return a list of pixels that need to be colored in for the editor to handle via `updatePixelBuffer(x, y)` (read into optimizations on the pixel buffer). It is now possible to introduce pen sizes and bucket tools. While this version does not use these modifications, the design of the application was made with this in mind and can be easily added as such.
 
@@ -54,7 +56,7 @@ Since React will force a re-render (redrawing the entire pattern from scratch) w
 
 The `pixelBuffer` is specific to the chosen drawing color and will force the file to update when the chosen drawing color has changed.
 
-The `pixelBuffer` also prevents the additions of pixels that match the last added pixel in the buffer. This is useful when the user is slowly drawing and the `mousemove` will generate draws on the same pixel more than once. Although this helps reduce duplicates, it will not prevent duplicates pixels from existing in the buffer.
+The `pixelBuffer` also prevents the additions of pixels that match the last added pixel in the buffer. This is useful when the user is slowly drawing and the `mousemove` will generate draws on the same pixel more than once. Although this helps reduce duplicates, it will not prevent duplicate pixels from existing in the buffer.
 
 ### 2. More Caching
 
@@ -66,7 +68,8 @@ Re-renders have also been further reduced by manually controlling component upda
 
 The qr code generator no longer probes for the `typeNumber` and uses hardcoded `typeNumbers` to reduce runtime. The qr code generator now only updates the qr codes that have been affected by data changes.
 
-
 ## Additional Notes
 
-* the [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) library doesn't support multipart QR codes (at all), we will be using the patched version of it by Thulinma instead (included in this repository and available on the original tool)
+* the [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) library doesn't support multipart QR codes (at all), we will be using the patched version of it by Thulinma instead available [here](https://github.com/Thulinma/ACNLPatternTool).
+
+* the [jsqrcode](https://github.com/LazarSoft/jsqrcode) library still has trouble recognizing the QR codes and there are still some errors to be fixed in the original library. We will be using Thulinma's patched version at [this fork's branch](https://github.com/Thulinma/jsqrcode/tree/finder_fix_mini)

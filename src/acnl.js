@@ -25,7 +25,11 @@ import * as FileSaver from 'file-saver';
 
 class ACNL {
 	constructor(data) {
-		if (arguments.length > 0) {
+		if (
+			arguments.length === 1 &&
+			(data.length === 0x26C ||
+			data.length === 0x870)
+		) {
 			this.data = data;
 		} else {
 			// set default data
@@ -94,24 +98,6 @@ class ACNL {
 		return tmp;
 	}
 
-
-	download() {
-		try {
-			var ab = new ArrayBuffer(this.data.length);
-      var ia = new Uint8Array(ab);
-      for (var i = 0; i < this.data.length; i++) {
-        ia[i] = this.data.charCodeAt(i);
-      }
-      var blob = new Blob([ia], {"type": "application/octet-stream"});
-
-			FileSaver.saveAs(blob, this.from_utf16(0x00)+".acnl");
-		}
-
-		catch {
-			alert("Failed to save file. Try using a different browser. :-(");
-		}
-	}
-
 	// allows only for writing to utf-16 portions of data
 	to_utf16(offset, str) {
 		let len;
@@ -134,6 +120,22 @@ class ACNL {
         this.setByte(offset + i*2+1, (str.charCodeAt(i) >> 8) & 0xFF);
       }
     }
+	}
+
+	download() {
+		try {
+			let ab = new ArrayBuffer(this.data.length);
+      let ia = new Uint8Array(ab);
+			for (var i = 0; i < this.data.length; i++) {
+        ia[i] = this.data.charCodeAt(i);
+			}
+			let blob = new Blob([ia], {"type": "application/octet-stream"});
+			
+			FileSaver.saveAs(blob, this.from_utf16(0x00)+".acnl");
+		}
+		catch {
+			alert("Failed to save file. Try using a different browser.");
+		}
 	}
 
 	getID(offset) {
