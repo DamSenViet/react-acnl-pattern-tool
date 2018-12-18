@@ -100,6 +100,7 @@ class EditorCanvas extends React.Component {
 
 		context.fillStyle = ACNL.paletteBinToHex[this.props.swatch[chosenColor]];
 		context.fillRect(x * zoom, y * zoom, zoom, zoom);
+		// draw the grid lines if zoom is large enough
 		if (zoom > 5) {
 			context.fillStyle = "#AAAAAA";
 			context.fillRect(x * zoom + zoom - 1, y * zoom, 1, zoom);
