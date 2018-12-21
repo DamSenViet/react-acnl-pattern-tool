@@ -188,7 +188,7 @@ class Editor extends React.Component {
 
 
 	// deal with metadata
-	
+
 	updatePatternTitle(title) {
 		this.clearQrCodeTimer();
 
@@ -207,7 +207,7 @@ class Editor extends React.Component {
 
 	updateUserName(name) {
 		this.clearQrCodeTimer();
-		
+
 		let acnl = this.state.acnl.clone();
 		if (acnl.userName !== name) {
 			acnl.userName = name;
@@ -287,6 +287,237 @@ class Editor extends React.Component {
 			() => this.setQrCodeTimer()
 		);
 	}
+
+
+	// perform import and convert according to setting
+	// we are just replacing the swatch, pattern data
+	convert(imgData, convSet) {
+		this.clearPixelRefreshTimer();
+		this.clearQrCodeTimer();
+
+		let acnl = this.state.acnl.clone();
+		// turn into a standard pattern
+		acnl.standardPattern();
+		
+		// select the palette
+		if (convSet === "top") this.usePaletteTop(acnl, imgData);
+		else if (convSet === "lowest") this.usePaletteLowest(acnl, imgData);
+		else if (convSet === "grey") this.usePaletteGrey(acnl);
+		else if (convSet === "sepia") this.usePaletteSepia(acnl); 
+
+		this.drawImage(acnl, imgData);
+
+		this.setState(
+			{
+				acnl: acnl,
+				chosenColor: 0,
+				isDrawing: false,
+				pixelBuffer: [],
+				pixelRefreshTimer: null,
+				shouldQrCodeUpdate: false,
+				qrRefreshTimer: null,
+			},
+			() => this.setQrCodeTimer()
+		);
+	}
+
+	/* CONVERT HELPER START */
+	// pick palette from 15 most used, inaccurate
+	usePaletteTop(acnl, imgData) {
+		let palette = [];
+		for (let i = 0; i < 256; ++i) {
+			palette.push({
+				binColor: i,
+				score: 0,
+			});
+		}
+
+		let scorePaletteColor = (r, g, b) => {
+			let best = 120;
+			let bestPaletteColor = 0;
+			for (let i = 0; i < 256; i++) {
+				let toMatch = ACNL.paletteBinToHex[i];
+				if (toMatch === undefined) continue;
+				let x = parseInt(toMatch.substr(1, 2), 16);
+				let y = parseInt(toMatch.substr(3, 2), 16);
+				let z = parseInt(toMatch.substr(5, 2), 16);
+				let matchDegree = Math.abs(x - r) + Math.abs(y - g) + Math.abs(z - b);
+				if (matchDegree < best) {
+					best = matchDegree;
+					bestPaletteColor = i;
+				}
+			}
+			// increment score for its occurence
+			palette[bestPaletteColor].score++;
+		}
+
+		// accumulate scores
+		for (let i = 0; i < 4096; i += 4) {
+			scorePaletteColor(
+				imgData.data[i],
+				imgData.data[i + 1],
+				imgData.data[i + 2]
+			);
+		}
+
+		// sort by palette occurences, decreasing order
+		palette.sort((a, b) => {
+			if (a.score > b.score) return -1;
+			if (a.score < b.score) return 1;
+			return 0;
+		});
+
+		// rebinding, cut the palette, leaving only binColors
+		let swatchBinColors = palette.slice(0, 15)
+		.map((palObj) => palObj.binColor);
+
+		for (let i = 0; i < swatchBinColors.length; ++i) {
+			acnl.setSwatchColor(i, swatchBinColors[i]);
+		}
+	}
+
+	// choosing palette from top 40 colors, accurate
+	usePaletteLowest(acnl, imgData) {
+		let palette = [];
+		let prepixels = [];
+		for (let i = 0; i < 256; ++i) {
+			palette.push({
+				binColor: i,
+				score: 0,
+			});
+		}
+
+		let scorePalette = (pixel, r, g, b) => {
+			let matches = {};
+			let best = 120;
+			let bestPaletteColor = 0;
+			for (let i = 0; i < 256; ++i) {
+				let toMatch = ACNL.paletteBinToHex[i];
+				if (toMatch === undefined) continue;
+				let x = parseInt(toMatch.substr(1, 2), 16);
+				let y = parseInt(toMatch.substr(3, 2), 16);
+				let z = parseInt(toMatch.substr(5, 2), 16);
+				let matchDegree = Math.abs(x - r) + Math.abs(y - g) + Math.abs(z - b);
+				if (matchDegree < best) {
+					best = matchDegree;
+					bestPaletteColor = i;
+				}
+				if (matchDegree < 120) {
+					matches[i.toString()] = matchDegree;
+				}
+			}
+			palette[bestPaletteColor].score++;
+			prepixels[pixel] = matches;
+		}
+
+		for (let i = 0; i < 4096; i += 4) {
+			scorePalette(
+				i/4,
+				imgData.data[i],
+				imgData.data[i + 1],
+				imgData.data[i + 2]
+			);
+		}
+
+		// sort by to decreasing score
+		palette.sort((a, b) => {
+			if (a.score > b.score) return -1;
+			if (a.score < b.score) return 1;
+			return 0;
+		});
+
+		palette = palette.slice(0, 40);
+		let bestBinColors = [];
+		let bestScore = 0x200000; // can always do better than this
+
+		// not using alert here, prevent alert from blocking thread
+		console.log("optimizing color palette...");
+		for (let i = 0; i < 4000 && palette.length > 16; ++i) {
+			let chosenBinColors = [];
+			
+			// pick random colors out of top 40
+			while (chosenBinColors.length < 15 && chosenBinColors < palette.length) {
+				let next = palette[Math.floor(Math.random() * palette.length)].binColor;
+				if (chosenBinColors.includes(next)) continue;
+				chosenBinColors.push(next);
+			}
+
+			// score random selection
+			let currentScore = 0;
+
+			// stop at first score that meets the criteria
+			for (let pixel in prepixels) {
+				let lowPixel = 750;
+				for (let m in prepixels[pixel]) {
+					if (!chosenBinColors.includes(parseInt(m))) continue;
+					if (prepixels[pixel][m] < lowPixel) {
+						lowPixel = prepixels[pixel][m];
+					}
+				}
+				currentScore += lowPixel;
+				if (currentScore >= bestScore) break;
+			}
+
+			if (currentScore < bestScore) {
+				bestScore = currentScore;
+				bestBinColors = chosenBinColors;
+			}
+		}
+
+		for (let i = 0; i < 15 && i < bestBinColors.length; ++i) {
+			acnl.setSwatchColor(i, bestBinColors[i]);
+		}
+	}
+
+	usePaletteGrey(acnl) {
+		for (let i = 0; i < 15; i++){
+      acnl.setSwatchColor(i, 0x10*i + 0xF);
+    }
+	}
+
+	usePaletteSepia(acnl) {
+    for (let i = 0; i < 9; i++){
+      acnl.setSwatchColor(i, 0x30 + i);
+    }
+    for (let i = 9; i < 15; i++){
+      acnl.setSwatchColor(i, 0x60 + i - 6);
+    }
+	}
+
+
+	// AKA previously "recolorize"
+	// draw image onto pattern based on palette
+	drawImage(acnl, imgData) {
+		// for a given rgb color, find the closest matching color in the swatch
+		let matchedSwatchColor = (r, g, b) => {
+			let best = 255 * 3;
+			let bestSwatchColor = 0;
+			for (let i = 0; i < 15; ++i) {
+				let swatchColor = acnl.getSwatchColor(i);
+				let toMatch = ACNL.paletteBinToHex[swatchColor];
+				let x = parseInt(toMatch.substr(1, 2), 16);
+				let y = parseInt(toMatch.substr(3, 2), 16);
+				let z = parseInt(toMatch.substr(5, 2), 16);
+				let matchDegree = Math.abs(x-r) + Math.abs(y - g) + Math.abs(z - b);
+				if (matchDegree < best) {
+					best = matchDegree;
+					bestSwatchColor = i;
+				}
+			}
+			return bestSwatchColor;
+		}
+
+		for (let i = 0; i < 4096; i += 4) {
+			let x = Math.floor(i / 4) % 32;
+			let y = Math.floor(Math.floor(i / 4) / 32);
+			acnl.colorPixel(x, y, matchedSwatchColor(
+				imgData.data[i],
+				imgData.data[i + 1],
+				imgData.data[i + 2]
+			));
+		}
+	}
+	/* CONVERT HELPER END */
 
 	shouldComponentUpdate(nextProps, nextState) {
 		// only render after refreshing pixels
@@ -382,6 +613,7 @@ class Editor extends React.Component {
 
 				<EditorImporter
 					import = {this.import.bind(this)}
+					convert = {this.convert.bind(this)}
 				/>
 
 				<EditorQrGenerator

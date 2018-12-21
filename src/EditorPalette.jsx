@@ -43,6 +43,8 @@ class EditorPalette extends React.Component {
 	renderColor(binColor) {
 		let isPicked = this.props.chosenBinColor === binColor;
 		let color = ACNL.paletteBinToHex[binColor];
+
+		// automatically perforrm click with number
 		return (
 			<EditorPaletteColor
 				isPicked = {isPicked}

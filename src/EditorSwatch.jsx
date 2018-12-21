@@ -44,6 +44,7 @@ class EditorSwatch extends React.Component {
 		let binColor = this.props.swatch[i];
 		let color = ACNL.paletteBinToHex[binColor];
 
+		// automatically perform onclick with preset number
 		return (
 			<EditorSwatchColor
 				isPicked = {isPicked}

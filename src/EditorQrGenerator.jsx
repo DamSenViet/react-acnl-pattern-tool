@@ -47,7 +47,7 @@ class EditorQrGenerator extends React.Component {
 	}
 
 	render() {
-		console.log("rendered");
+		// console.log("rendered");
 		let data = this.props.data;
 		let isProPattern = this.props.isProPattern;
 		let qrCodes = [];

@@ -193,6 +193,23 @@ class ACNL {
 		this.setByte(offset + 1, num & 0xFF);
 	}
 
+
+	// turns a pro pattern into a regular pattern
+	standardPattern() {
+		if (this.data.length > 0x26C) {
+			this.data = this.data.substr(0, 0x26C);
+		}
+	}
+	
+	// turns regular pattern into a pro pattern
+	proPattern() {
+		if (this.data.length < 0x870) {
+			// note repeat is the nly way to add trash values
+			this.data = this.data
+			+ String.fromCharCode(0).repeat(0x870 - this.data.length);
+		}
+	}
+
 	isProPattern() {
 		return this.data.length === 0x870;
 	}
@@ -280,6 +297,12 @@ class ACNL {
 			throw new Error("new color is invalid");
 		}
 		this.setByte(0x58 + chosenColor, newBinColor);
+	}
+
+	// this one returns the binary color
+	getSwatchColor(chosenColor) {
+		if (chosenColor < 0 || chosenColor > 15) throw new Error("invalid chosen color");
+		return this.getByte(0x58 + chosenColor);
 	}
 
 	get patternTitle() {

@@ -1,3 +1,5 @@
+# React Animal Crossing New Leaf Tool
+
 A React.js port of [Animal Crossing New Leaf Pattern Tool](https://github.com/Thulinma/ACNLPatternTool) by [Thulinma](https://github.com/Thulinma)
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
@@ -20,7 +22,7 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 ## Notes
 
-* the [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) library doesn't support multipart QR codes (at all), we will be using the patched version of it by Thulinma instead available [here](https://github.com/Thulinma/ACNLPatternTool).
+* the [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) library doesn't support multipart QR codes (at all), we will be using the patched version of it by Thulinma instead available [here](https://github.com/Thulinma/ACNLPatternTool/blob/master/qrcode.js).
 
 * the [jsqrcode](https://github.com/LazarSoft/jsqrcode) library still has trouble recognizing the QR codes and there are still some errors to be fixed in the original library. We will be using Thulinma's patched version at [his fork's branch](https://github.com/Thulinma/jsqrcode/tree/finder_fix_mini).
 
@@ -40,6 +42,26 @@ You will also see any lint errors in the console.
 ## Old Architecture
 
 The architecture for original application (not this one) was unorganized. Both the controller and model directly rendered parts of the view on their own. It wasn't very clear how it should be handled.
+
+`acnl.js`
+```javascript
+
+function setColor() {
+  ...
+  for (var i in canvasses){
+    drawPixel(canvasses[i], x, y, c, getZoom(canvasses[i].canvas));
+  }
+}
+
+```
+
+`page.js`
+```javascript
+  .mousemove(function(event) {
+    ...
+    ACNL.setColor(x, y, chosen_color)
+  })
+```
 
 ## New Architecture
 
@@ -87,7 +109,7 @@ The qr code generator no longer probes for the `typeNumber` and uses hardcoded `
 
 ### Overall
 
-Even though the application has been restructured to fit into the React.js framework with optimizations added and dependencies (e.g. jquery) removed, the overall performance (for drawing) of the application turned out worst than the original (in some respects). Let's get down to the specifics. We'll discuss just drawing and event handling since these are two most important. The specific use case we'll be discussing is drawing on pattern continuously without lifting the mouse. The statistical test done via Chrome's performance profiles at varying performance throttling levels (1x, 4x, 6x).
+Even though the application has been restructured to fit into the React.js framework with optimizations added and dependencies (e.g. jquery) removed, the overall performance (for drawing) of the application turned out worst than the original (in some respects). Let's get down to the specifics. We'll discuss just drawing and event handling since these are two most important. The specific use case we'll be discussing is drawing on pattern continuously without lifting the mouse. The statistical test was done via Chrome's performance profiles at varying performance throttling levels (1x, 4x, 6x).
 
 ### Pattern Rendering
 
@@ -108,6 +130,8 @@ Our port loses out in this race, even with the optimizations. If we were to comp
 
 React uses a [synthetic event handler](https://reactjs.org/docs/events.html) instead of native event handlers to account for browser compatibility. The synthetic event handler comes with a lot of overhead, both from being passed around and from deep encapsulation. 
 
-When drawing for `10s` straight, the port's total raw handling time went from `31.0ms` to a total synthetic event handling time of `567.1ms`. The original tool using jquery to handle events, went from a raw `96.0ms` to `215.1ms`. While we beat the original tool by a wide margin in raw event handling (due to the `pixelBuffer` caching the file operations), we were not able to beat the original tool in overall event handling due to React's synthetic wrapper.
+When drawing for `10s` straight, the port's total raw handling time went from `31.0ms` to a total synthetic event handling time of `567.1ms`. The original tool, using jquery to handle events, went from a raw `96.0ms` to `215.1ms`. While we beat the original tool by a wide margin in raw event handling (due to the `pixelBuffer` caching the file operations), we were not able to beat the original tool in overall event handling due to React's synthetic wrapper.
 
-So what did we learn with all this effort? Don't use React.js when you have to constantly handle events like in a drawing application. It's a bad idea. This port will only be updated to the original tool's status and then abandoned afterwards.
+### Conclusion
+
+So what did we learn with all this effort? Don't use React.js when you have to constantly handle events like in a drawing application. It's a bad idea due to the overhead costs associated with the event wrapper created by React. This port will only be updated to the original tool's status and then abandoned afterwards.
