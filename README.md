@@ -134,4 +134,4 @@ When drawing for `10s` straight, the port's total raw handling time went from `3
 
 ### Conclusion
 
-So what did we learn with all this effort? Don't use React.js when you have to constantly handle events like in a drawing application. It's a bad idea due to the overhead costs associated with the event wrapper created by React. This port will only be updated to the original tool's status and then abandoned afterwards.
+So what did we learn with all this effort? Don't use React.js when you have to constantly handle events like in a drawing application. It's a bad idea due to the overhead costs associated with the synethetic event wrapper created by React.
