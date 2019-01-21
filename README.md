@@ -79,7 +79,7 @@ Note: the term pixel in this write-up refers to a pattern pixel drawn onto the c
 
 The editor is the parent of the canvas, palette, swatch, and qr code generator. It acts as the main center of control. Components cannot update each other directly, but must now communicate with the editor component in order to update other components and the model respectively. Figuratively, the 'editor' is a user that can manipulate both the model and the view. The 'editor' holds onto user information (e.g. current drawing color).
 
-The components themselves are now modular, easily allowing for additional modifications to be added. For example, pixel tools can be added in the form of a module. All they have to do is return a list of pixels that need to be colored in for the editor to handle via `updatePixelBuffer(x, y)` (read into optimizations on the pixel buffer). It is now possible to introduce pen sizes and bucket tools. While this version does not use these modifications, the design of the application was made with this in mind and can be easily added as such.
+The components themselves are now modular, easily allowing for additional modifications to be added. For example, pixel tools can be added in the form of a module. All they have to do is return a list of pixels that need to be colored in for the editor to handle via `updatePixelBuffer([pixels...[x, y]])` (read into optimizations on the pixel buffer). It is now possible to introduce pen sizes and bucket tools by simplying extending the EditorTools module.
 
 ## Optimizations
 

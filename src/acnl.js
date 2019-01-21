@@ -20,7 +20,6 @@
 //0x66C - 0x86B (512) = Pattern Data 4 (optional)
 //0x86C - 0x86F (  4) = Zero padding (optional)
 
-// import * as FileSaver from 'file-saver';
 import * as FileSaver from 'file-saver';
 
 class ACNL {
@@ -112,22 +111,22 @@ class ACNL {
 		}
 
 		for (let i = 0; i < len; ++i){
-      if (i >= str.length){
-        this.setByte(offset + i*2, 0);
-        this.setByte(offset + i*2+1, 0);
-      } else{
-        this.setByte(offset + i*2, str.charCodeAt(i) & 0xFF);
-        this.setByte(offset + i*2+1, (str.charCodeAt(i) >> 8) & 0xFF);
-      }
-    }
+			if (i >= str.length){
+				this.setByte(offset + i*2, 0);
+				this.setByte(offset + i*2+1, 0);
+			} else{
+				this.setByte(offset + i*2, str.charCodeAt(i) & 0xFF);
+				this.setByte(offset + i*2+1, (str.charCodeAt(i) >> 8) & 0xFF);
+			}
+		}
 	}
 
 	download() {
 		try {
 			let ab = new ArrayBuffer(this.data.length);
-      let ia = new Uint8Array(ab);
-			for (var i = 0; i < this.data.length; i++) {
-        ia[i] = this.data.charCodeAt(i);
+			let ia = new Uint8Array(ab);
+			for (let i = 0; i < this.data.length; i++) {
+				ia[i] = this.data.charCodeAt(i);
 			}
 			let blob = new Blob([ia], {"type": "application/octet-stream"});
 			
@@ -195,16 +194,16 @@ class ACNL {
 
 
 	// turns a pro pattern into a regular pattern
-	standardPattern() {
+	toStandardPattern() {
 		if (this.data.length > 0x26C) {
 			this.data = this.data.substr(0, 0x26C);
 		}
 	}
 	
 	// turns regular pattern into a pro pattern
-	proPattern() {
+	toProPattern() {
 		if (this.data.length < 0x870) {
-			// note repeat is the nly way to add trash values
+			// note repeat is the only way to add trash values
 			this.data = this.data
 			+ String.fromCharCode(0).repeat(0x870 - this.data.length);
 		}
@@ -256,7 +255,7 @@ class ACNL {
 		// bottom right -> pattern 4
 		else if (x <= 63 && y <= 63) patternNum = 3;
 
-		var offset = 0x6C + Math.floor(x % 32 / 2) + (y % 32) * 16;
+		let offset = 0x6C + Math.floor(x % 32 / 2) + (y % 32) * 16;
 		// correct offset based on quadrant
 		offset += (patternNum * 512);
 		// console.log(offset.toString(16));

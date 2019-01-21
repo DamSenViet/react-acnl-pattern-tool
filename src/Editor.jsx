@@ -5,6 +5,7 @@ import EditorSwatch from './EditorSwatch.jsx';
 import EditorMetadata from './EditorMetadata.jsx';
 import EditorImporter from './EditorImporter.jsx';
 import EditorQrGenerator from './EditorQrGenerator.jsx';
+import * as EditorTools from './EditorTools.js';
 
 // regular js imports
 import ACNL from './acnl.js';
@@ -17,7 +18,8 @@ class Editor extends React.Component {
 		super(props);
 		this.state = {
 			acnl: new ACNL(),
- 			chosenColor: 0,
+			chosenColor: 0,
+			chosenTool: new EditorTools.Pen(),
 			isDrawing: false,
 			// buffers pixel operations for a SINGLE chosen color
 			pixelBuffer: [],
@@ -81,33 +83,45 @@ class Editor extends React.Component {
 	// need to guarantee a pixel refresh (complete update to ACNL file) sometime
 	// support for multi-pixel drawing tools e.g. bucket, bigger pen sizes
 	// by adding specific pixels
-	updatePixelBuffer(x, y) {
+	updatePixelBuffer(pixelsToAdd) {
 		this.clearQrCodeTimer();
 
 		// mousemove might be called "too quickly" and add the last pixel twice
 		// do not handle duplicate pixels in the last pos of the buffer
 		let pixelBuffer = this.state.pixelBuffer.slice();
-		let pixelBufferLastIndex = pixelBuffer.length - 1;
-		if (
-			pixelBufferLastIndex < 0 ||
-			x !== pixelBuffer[pixelBufferLastIndex][0] ||
-			y !== pixelBuffer[pixelBufferLastIndex][1]
-		) {
+		let chosenTool = this.state.chosenTool;
+		if (chosenTool.willUpdatePixelBuffer(pixelsToAdd, pixelBuffer)) {
 			this.clearPixelRefreshTimer();
-			pixelBuffer.push([x, y]);
 			let chosenColor = this.state.chosenColor;
+			
+			// update context before performing operations
 			for (let i = 0; i < this.state.canvases.length; ++i) {
-				this.state.canvases[i].current.updateContext();
-				// losing context here, update context right before drawing
-				// not much time spent updating context anyway
-				// KEEP CONTEXT CACHED for full re-render speed
-				this.state.canvases[i].current.drawPixel(x, y, chosenColor);
+				this.state.canvases.forEach(ref => {
+					// KEEP CONTEXT CACHED for full re-render speed
+					// losing context here, update context right before drawing
+					// not much time spent updating context anyway
+					ref.current.updateContext();
+				});
 			}
-			this.setPixelRefreshTimer();
-			this.setState({
-				pixelBuffer: pixelBuffer,
-				shouldQrCodeUpdate: false,
-			});
+
+			// add each pixel to the buffer and color it in
+			for (let i = 0; i < pixelsToAdd.length; ++i) {
+				let pixel = pixelsToAdd[i];
+				let x = pixel[0];
+				let y = pixel[1];
+				pixelBuffer.push([x, y]);
+				for (let i = 0; i < this.state.canvases.length; ++i) {
+					this.state.canvases[i].current.drawPixel(x, y, chosenColor);
+				}
+			}
+			
+			this.setState(
+				{
+					pixelBuffer: pixelBuffer,
+					shouldQrCodeUpdate: false,
+				},
+				() => this.setPixelRefreshTimer()
+			);
 		}
 	}
 
@@ -297,13 +311,13 @@ class Editor extends React.Component {
 
 		let acnl = this.state.acnl.clone();
 		// turn into a standard pattern
-		acnl.standardPattern();
-		
+		acnl.toStandardPattern();
+
 		// select the palette
 		if (convSet === "top") this.usePaletteTop(acnl, imgData);
 		else if (convSet === "lowest") this.usePaletteLowest(acnl, imgData);
 		else if (convSet === "grey") this.usePaletteGrey(acnl);
-		else if (convSet === "sepia") this.usePaletteSepia(acnl); 
+		else if (convSet === "sepia") this.usePaletteSepia(acnl);
 
 		this.drawImage(acnl, imgData);
 
@@ -434,7 +448,7 @@ class Editor extends React.Component {
 		console.log("optimizing color palette...");
 		for (let i = 0; i < 4000 && palette.length > 16; ++i) {
 			let chosenBinColors = [];
-			
+
 			// pick random colors out of top 40
 			while (chosenBinColors.length < 15 && chosenBinColors < palette.length) {
 				let next = palette[Math.floor(Math.random() * palette.length)].binColor;
@@ -471,17 +485,17 @@ class Editor extends React.Component {
 
 	usePaletteGrey(acnl) {
 		for (let i = 0; i < 15; i++){
-      acnl.setSwatchColor(i, 0x10*i + 0xF);
-    }
+			acnl.setSwatchColor(i, 0x10*i + 0xF);
+		}
 	}
 
 	usePaletteSepia(acnl) {
-    for (let i = 0; i < 9; i++){
-      acnl.setSwatchColor(i, 0x30 + i);
-    }
-    for (let i = 9; i < 15; i++){
-      acnl.setSwatchColor(i, 0x60 + i - 6);
-    }
+		for (let i = 0; i < 9; i++){
+			acnl.setSwatchColor(i, 0x30 + i);
+		}
+		for (let i = 9; i < 15; i++){
+			acnl.setSwatchColor(i, 0x60 + i - 6);
+		}
 	}
 
 
@@ -528,14 +542,15 @@ class Editor extends React.Component {
 	render() {
 		let acnl = this.state.acnl;
 		let chosenColor = this.state.chosenColor;
+		let chosenTool = this.state.chosenTool;
 		let isDrawing = this.state.isDrawing;
 		let canvases = this.state.canvases;
 		let canvasSizes = [64, 128, 512];
+		// perform actualZoom calculations
 		let actualZooms = canvasSizes.map((size) => {
 			if (acnl.isProPattern()) return size/64;
 			else return size/32;
 		});
-
 		let shouldQrCodeUpdate = this.state.shouldQrCodeUpdate;
 
 
@@ -550,6 +565,7 @@ class Editor extends React.Component {
 						patterns = {acnl.patterns}
 						isProPattern = {acnl.isProPattern()}
 						chosenColor = {chosenColor}
+						chosenTool = {chosenTool}
 						isDrawing = {isDrawing}
 						setIsDrawing = {this.setIsDrawing.bind(this)}
 						updatePixelBuffer = {this.updatePixelBuffer.bind(this)}
@@ -564,6 +580,7 @@ class Editor extends React.Component {
 						patterns = {acnl.patterns}
 						isProPattern = {acnl.isProPattern()}
 						chosenColor = {chosenColor}
+						chosenTool = {chosenTool}
 						isDrawing = {isDrawing}
 						setIsDrawing = {this.setIsDrawing.bind(this)}
 						updatePixelBuffer = {this.updatePixelBuffer.bind(this)}
@@ -579,6 +596,7 @@ class Editor extends React.Component {
 					patterns = {acnl.patterns}
 					isProPattern = {acnl.isProPattern()}
 					chosenColor = {chosenColor}
+					chosenTool = {chosenTool}
 					isDrawing = {isDrawing}
 					setIsDrawing = {this.setIsDrawing.bind(this)}
 					updatePixelBuffer = {this.updatePixelBuffer.bind(this)}

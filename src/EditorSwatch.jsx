@@ -68,32 +68,32 @@ class EditorSwatch extends React.Component {
 		// console.log("rendered swatch");
 		return (
 			<div className="swatch">
-		    <div className="swatch-color-row">
+				<div className="swatch-color-row">
 					{this.renderColor(0)}
 					{this.renderColor(1)}
 					{this.renderColor(2)}
-		    </div>
-		    <div className="swatch-color-row">
+				</div>
+				<div className="swatch-color-row">
 					{this.renderColor(3)}
 					{this.renderColor(4)}
 					{this.renderColor(5)}
-		    </div>
-		    <div className="swatch-color-row">
+				</div>
+				<div className="swatch-color-row">
 					{this.renderColor(6)}
 					{this.renderColor(7)}
 					{this.renderColor(8)}
-		    </div>
-		    <div className="swatch-color-row">
+				</div>
+				<div className="swatch-color-row">
 					{this.renderColor(9)}
 					{this.renderColor(10)}
 					{this.renderColor(11)}
-		    </div>
-		    <div className="swatch-color-row">
+				</div>
+				<div className="swatch-color-row">
 					{this.renderColor(12)}
 					{this.renderColor(13)}
 					{this.renderColor(14)}
-		    </div>
-		  </div>
+				</div>
+			</div>
 		);
 	}
 }

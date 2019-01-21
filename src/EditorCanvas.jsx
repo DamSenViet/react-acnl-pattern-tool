@@ -40,7 +40,9 @@ class EditorCanvas extends React.Component {
 		// if handler is not fast enough, need to ensure speed, using buffers
 		// updatePixelBuffer will command all canvases to draw the pixels too
 		// console.log(x, y);
-		this.props.updatePixelBuffer(x, y);
+		let pattern = this.props.pattern;
+		let chosenTool = this.props.chosenTool;
+		this.props.updatePixelBuffer(chosenTool.transform(x, y, pattern));
 	}
 
 
