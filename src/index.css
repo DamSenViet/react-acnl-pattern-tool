@@ -3,15 +3,21 @@ body, html {
   background-color: black;
 }
 
+.editor {
+  padding-top: 40px;
+  padding-left: 40px;
+}
+
 .canvas-container {
 	display: inline-block;
-	vertical-align: bottom;
+  vertical-align: top;
+  margin-right: 20px;
 }
 
 .canvas {
 	display:inline-block;
-	margin-left:32px;
-	margin-bottom:32px;
+	margin-left: 32px;
+	margin-top: 32px;
   border: 1px solid white;
   background-color: white;
 }
@@ -26,6 +32,12 @@ body, html {
 	vertical-align: bottom;
 }
 
+.color-tools {
+  display: inline-block;
+  width: 164px;
+  vertical-align: top;
+  margin-left: 20px;
+}
 
 .swatch, .palette {
 	user-select: none;
@@ -33,9 +45,10 @@ body, html {
 }
 
 .swatch {
-	display:inline-block;
+  margin-top: 32px;
+	display: inline-block;
 	margin-right: 5px;
-	vertical-align: bottom;
+	vertical-align: top;
 }
 
 .swatch-color-row {
@@ -129,5 +142,5 @@ body, html {
 }
 
 .qr-code-container {
-	margin-top: 30px;
+	margin-top: 100px;
 }

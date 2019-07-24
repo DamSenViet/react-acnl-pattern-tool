@@ -61,7 +61,7 @@ class Editor extends React.Component {
 	}
 
 	// any time we make modifications to acnl data, need to reset qr timer
-	selectPaletteColor(newBinColor){
+	selectPaletteColor(newBinColor) {
 		this.refreshPixels(() => {
 			let acnl = this.state.acnl.clone();
 			let chosenColor = this.state.chosenColor;
@@ -93,7 +93,7 @@ class Editor extends React.Component {
 		if (chosenTool.willUpdatePixelBuffer(pixelsToAdd, pixelBuffer)) {
 			this.clearPixelRefreshTimer();
 			let chosenColor = this.state.chosenColor;
-			
+
 			// update context before performing operations
 			for (let i = 0; i < this.state.canvases.length; ++i) {
 				this.state.canvases.forEach(ref => {
@@ -114,7 +114,7 @@ class Editor extends React.Component {
 					this.state.canvases[i].current.drawPixel(x, y, chosenColor);
 				}
 			}
-			
+
 			this.setState(
 				{
 					pixelBuffer: pixelBuffer,
@@ -240,7 +240,7 @@ class Editor extends React.Component {
 
 		let acnl = this.state.acnl.clone();
 		if (acnl.userID !== id) {
-			acnl.userID = id ;
+			acnl.userID = id;
 			this.setState(
 				{
 					acnl: acnl,
@@ -383,7 +383,7 @@ class Editor extends React.Component {
 
 		// rebinding, cut the palette, leaving only binColors
 		let swatchBinColors = palette.slice(0, 15)
-		.map((palObj) => palObj.binColor);
+			.map((palObj) => palObj.binColor);
 
 		for (let i = 0; i < swatchBinColors.length; ++i) {
 			acnl.setSwatchColor(i, swatchBinColors[i]);
@@ -426,7 +426,7 @@ class Editor extends React.Component {
 
 		for (let i = 0; i < 4096; i += 4) {
 			scorePalette(
-				i/4,
+				i / 4,
 				imgData.data[i],
 				imgData.data[i + 1],
 				imgData.data[i + 2]
@@ -484,16 +484,16 @@ class Editor extends React.Component {
 	}
 
 	usePaletteGrey(acnl) {
-		for (let i = 0; i < 15; i++){
-			acnl.setSwatchColor(i, 0x10*i + 0xF);
+		for (let i = 0; i < 15; i++) {
+			acnl.setSwatchColor(i, 0x10 * i + 0xF);
 		}
 	}
 
 	usePaletteSepia(acnl) {
-		for (let i = 0; i < 9; i++){
+		for (let i = 0; i < 9; i++) {
 			acnl.setSwatchColor(i, 0x30 + i);
 		}
-		for (let i = 9; i < 15; i++){
+		for (let i = 9; i < 15; i++) {
 			acnl.setSwatchColor(i, 0x60 + i - 6);
 		}
 	}
@@ -512,7 +512,7 @@ class Editor extends React.Component {
 				let x = parseInt(toMatch.substr(1, 2), 16);
 				let y = parseInt(toMatch.substr(3, 2), 16);
 				let z = parseInt(toMatch.substr(5, 2), 16);
-				let matchDegree = Math.abs(x-r) + Math.abs(y - g) + Math.abs(z - b);
+				let matchDegree = Math.abs(x - r) + Math.abs(y - g) + Math.abs(z - b);
 				if (matchDegree < best) {
 					best = matchDegree;
 					bestSwatchColor = i;
@@ -548,8 +548,8 @@ class Editor extends React.Component {
 		let canvasSizes = [64, 128, 512];
 		// perform actualZoom calculations
 		let actualZooms = canvasSizes.map((size) => {
-			if (acnl.isProPattern()) return size/64;
-			else return size/32;
+			if (acnl.isProPattern()) return size / 64;
+			else return size / 32;
 		});
 		let shouldQrCodeUpdate = this.state.shouldQrCodeUpdate;
 
@@ -558,86 +558,89 @@ class Editor extends React.Component {
 			<div className="editor">
 				<div className="canvas-container">
 					<EditorCanvas
-						size = {64}
-						canvasNumber = {0}
-						actualZoom = {actualZooms[0]}
-						swatch = {acnl.swatch}
-						patterns = {acnl.patterns}
-						isProPattern = {acnl.isProPattern()}
-						chosenColor = {chosenColor}
-						chosenTool = {chosenTool}
-						isDrawing = {isDrawing}
-						setIsDrawing = {this.setIsDrawing.bind(this)}
-						updatePixelBuffer = {this.updatePixelBuffer.bind(this)}
-						ref = {canvases[0]}
+						size={128}
+						canvasNumber={1}
+						actualZoom={actualZooms[1]}
+						swatch={acnl.swatch}
+						patterns={acnl.patterns}
+						isProPattern={acnl.isProPattern()}
+						chosenColor={chosenColor}
+						chosenTool={chosenTool}
+						isDrawing={isDrawing}
+						setIsDrawing={this.setIsDrawing.bind(this)}
+						updatePixelBuffer={this.updatePixelBuffer.bind(this)}
+						ref={canvases[1]}
 					/>
 
 					<EditorCanvas
-						size = {128}
-						canvasNumber = {1}
-						actualZoom = {actualZooms[1]}
-						swatch = {acnl.swatch}
-						patterns = {acnl.patterns}
-						isProPattern = {acnl.isProPattern()}
-						chosenColor = {chosenColor}
-						chosenTool = {chosenTool}
-						isDrawing = {isDrawing}
-						setIsDrawing = {this.setIsDrawing.bind(this)}
-						updatePixelBuffer = {this.updatePixelBuffer.bind(this)}
-						ref = {canvases[1]}
+						size={64}
+						canvasNumber={0}
+						actualZoom={actualZooms[0]}
+						swatch={acnl.swatch}
+						patterns={acnl.patterns}
+						isProPattern={acnl.isProPattern()}
+						chosenColor={chosenColor}
+						chosenTool={chosenTool}
+						isDrawing={isDrawing}
+						setIsDrawing={this.setIsDrawing.bind(this)}
+						updatePixelBuffer={this.updatePixelBuffer.bind(this)}
+						ref={canvases[0]}
 					/>
+
 				</div>
 
 				<EditorCanvas
-					size = {512}
-					canvasNumber = {2}
-					actualZoom = {actualZooms[2]}
-					swatch = {acnl.swatch}
-					patterns = {acnl.patterns}
-					isProPattern = {acnl.isProPattern()}
-					chosenColor = {chosenColor}
-					chosenTool = {chosenTool}
-					isDrawing = {isDrawing}
-					setIsDrawing = {this.setIsDrawing.bind(this)}
-					updatePixelBuffer = {this.updatePixelBuffer.bind(this)}
-					ref = {canvases[2]}
+					size={512}
+					canvasNumber={2}
+					actualZoom={actualZooms[2]}
+					swatch={acnl.swatch}
+					patterns={acnl.patterns}
+					isProPattern={acnl.isProPattern()}
+					chosenColor={chosenColor}
+					chosenTool={chosenTool}
+					isDrawing={isDrawing}
+					setIsDrawing={this.setIsDrawing.bind(this)}
+					updatePixelBuffer={this.updatePixelBuffer.bind(this)}
+					ref={canvases[2]}
 				/>
 
-				<EditorSwatch
-					swatch = {acnl.swatch}
-					chosenColor = {chosenColor}
-					onClick = {this.selectSwatchColor.bind(this)}
-				/>
+			<div class="color-tools">
+					<EditorPalette
+						chosenBinColor={acnl.swatch[chosenColor]}
+						onClick={this.selectPaletteColor.bind(this)}
+					/>
 
-				<EditorPalette
-					chosenBinColor = {acnl.swatch[chosenColor]}
-					onClick = {this.selectPaletteColor.bind(this)}
-				/>
+					<EditorSwatch
+						swatch={acnl.swatch}
+						chosenColor={chosenColor}
+						onClick={this.selectSwatchColor.bind(this)}
+					/>
+			</div>
 
 
 				<EditorMetadata
-					patternTitle = {acnl.patternTitle}
-					userName = {acnl.userName}
-					userID = {acnl.userID}
-					townName = {acnl.townName}
-					townID = {acnl.townID}
+					patternTitle={acnl.patternTitle}
+					userName={acnl.userName}
+					userID={acnl.userID}
+					townName={acnl.townName}
+					townID={acnl.townID}
 
-					updatePatternTitle = {this.updatePatternTitle.bind(this)}
-					updateUserName = {this.updateUserName.bind(this)}
-					updateUserID = {this.updateUserID.bind(this)}
-					updateTownName = {this.updateTownName.bind(this)}
-					updateTownID = {this.updateTownID.bind(this)}
+					updatePatternTitle={this.updatePatternTitle.bind(this)}
+					updateUserName={this.updateUserName.bind(this)}
+					updateUserID={this.updateUserID.bind(this)}
+					updateTownName={this.updateTownName.bind(this)}
+					updateTownID={this.updateTownID.bind(this)}
 				/>
 
 				<EditorImporter
-					import = {this.import.bind(this)}
-					convert = {this.convert.bind(this)}
+					import={this.import.bind(this)}
+					convert={this.convert.bind(this)}
 				/>
 
 				<EditorQrGenerator
-					data = {acnl.data}
-					isProPattern = {acnl.isProPattern()}
-					shouldQrCodeUpdate = {shouldQrCodeUpdate}
+					data={acnl.data}
+					isProPattern={acnl.isProPattern()}
+					shouldQrCodeUpdate={shouldQrCodeUpdate}
 				/>
 			</div>
 		);
