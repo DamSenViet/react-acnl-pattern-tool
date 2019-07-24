@@ -4,6 +4,10 @@ A React.js port of [Animal Crossing New Leaf Pattern Tool](https://github.com/Th
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+<p>
+  <img src="./screenshots/desktop.png" height="300" />
+</p>
+
 ## Table of Contents
 * [Stack](#stack)
 * [Notes](#notes)
@@ -126,9 +130,9 @@ This port also caches expensive operations such as `DOMelement.getBoundingClient
 
 ### Event Handling
 
-Our port loses out in this race, even with the optimizations. If we were to compare raw event handler functions (`draw` in `Editor.jsx` vs `setColor` in `acnl.js` from the original) performance used for drawing against each other, this version does much, much better than the original (by almost `300%` in fact). How is it possible that we still lose in overall event handling? 
+Our port loses out in this race, even with the optimizations. If we were to compare raw event handler functions (`draw` in `Editor.jsx` vs `setColor` in `acnl.js` from the original) performance used for drawing against each other, this version does much, much better than the original (by almost `300%` in fact). How is it possible that we still lose in overall event handling?
 
-React uses a [synthetic event handler](https://reactjs.org/docs/events.html) instead of native event handlers to account for browser compatibility. The synthetic event handler comes with a lot of overhead, both from being passed around and from deep encapsulation. 
+React uses a [synthetic event handler](https://reactjs.org/docs/events.html) instead of native event handlers to account for browser compatibility. The synthetic event handler comes with a lot of overhead, both from being passed around and from deep encapsulation.
 
 When drawing for `10s` straight, the port's total raw handling time went from `31.0ms` to a total synthetic event handling time of `567.1ms`. The original tool, using jquery to handle events, went from a raw `96.0ms` to `215.1ms`. While we beat the original tool by a wide margin in raw event handling (due to the `pixelBuffer` caching the file operations), we were not able to beat the original tool in overall event handling due to React's synthetic wrapper.
 
