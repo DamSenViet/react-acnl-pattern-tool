@@ -604,7 +604,7 @@ class Editor extends React.Component {
 					ref={canvases[2]}
 				/>
 
-			<div class="color-tools">
+			<div className="color-tools">
 					<EditorPalette
 						chosenBinColor={acnl.swatch[chosenColor]}
 						onClick={this.selectPaletteColor.bind(this)}
