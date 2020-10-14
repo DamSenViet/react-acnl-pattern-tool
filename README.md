@@ -1,6 +1,8 @@
 # React Animal Crossing New Leaf Tool
 
-A React.js port of [Animal Crossing New Leaf Pattern Tool](https://github.com/Thulinma/ACNLPatternTool) by [Thulinma](https://github.com/Thulinma)
+A React.js port of the initial [Animal Crossing New Leaf Pattern Tool](https://github.com/Thulinma/ACNLPatternTool) by [Thulinma](https://github.com/Thulinma).
+
+(This app is outdated as of 2020).
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
