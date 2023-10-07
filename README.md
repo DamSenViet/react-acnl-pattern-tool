@@ -1,14 +1,20 @@
 # React Animal Crossing New Leaf Tool
 
-A React.js port of the initial [Animal Crossing New Leaf Pattern Tool](https://github.com/Thulinma/ACNLPatternTool) by [Thulinma](https://github.com/Thulinma).
+<div align='center'>
+  <a href="https://damsenviet.github.io/react-acnl-pattern-tool/">
+    <img src="./screenshots/desktop.png" height="300" />
+  </a>
+  <br>
+  <br>
+  <p>
+      <a href="https://damsenviet.github.io/react-acnl-pattern-tool/"><b>Official Website</b></a>
+  </p>
+    A React.js port of the initial <a href="https://github.com/Thulinma/ACNLPatternTool/tree/dc454c3ffdbb20801a9e7dab62c79e0abf5c04e5">
+    Animal Crossing New Leaf Pattern Tool</a> by <a href="https://github.com/Thulinma">Thulinma</a>
+  </p>
+  <p>This project was bootstrapped with <a href="https://github.com/facebook/create-react-app">Create React App</a></p>
+</div>
 
-(This app is outdated as of 2020).
-
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
-
-<p>
-  <img src="./screenshots/desktop.png" height="300" />
-</p>
 
 ## Table of Contents
 * [Stack](#stack)
